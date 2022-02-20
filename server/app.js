@@ -21,12 +21,33 @@ function msToTime(duration) {
 
 const stopwatch = new Stopwatch();
 
-stopwatch.start();
+const timer = new Stopwatch();
 
-const timerMinutes = 10;
+//var timerTime = 0;
+const timerMillis = 25000;
 
-var timeLeft = '';
 
+function startTimer() {
+    timer.start();
+}
+
+function stopTimer() {
+    timer.split(); 
+}
+
+function resumeTimer() {
+  timer.unsplit();
+}
+
+function resetTimer() {
+  timer.reset(); 
+  //timerTime = 0;
+}
+
+
+//var timeLeft = '';
+
+/*
 function startTimer(minutes) {
     
     // Get today's date and time
@@ -55,23 +76,67 @@ function startTimer(minutes) {
         
         timeLeft = hours + ":"
         + minutes + ":" + seconds;
-        console.log(timeLeft);
+        //console.log(timeLeft);
       
         // If the count down is finished, write some text
-        if (distance < 0) {
+        /*if (distance < 0) {
           clearInterval(x);
           document.getElementById("demo").innerHTML = "EXPIRED";
-        }
-      }, 1000);
+        }*/
+     // }, 1000);
 
-}
-startTimer(10);
+//}
+
 
 //const tasks = new Array['jõldak'];
 
-app.get('/getTimes', (req, res) => {        
-    res.json({stopwatch: msToTime(stopwatch.read()),timer: timeLeft});
+app.get('/stopper/time', (req, res) => { 
+    res.json({stopwatch: msToTime(stopwatch.read())});
 });
+
+app.get('/timer/time', (req, res) => { 
+  timerTime = timerMillis - timer.read();
+  if (timerTime < 0) {
+    timerTime = 0;
+    //timer.stop();
+    timer.reset();
+  }
+  res.json({timer: msToTime(timerTime)});
+  
+});
+
+
+app.post('/stopper/start', () => {
+  stopwatch.start();        
+  console.log(stopwatch.read());
+});
+
+app.post('/stopper/reset', () => {
+  stopwatch.reset();
+  console.log(stopwatch.read());        
+});
+
+app.post('/stopper/stop', () => {
+  stopwatch.stop();  
+  console.log(stopwatch.read());       
+});
+
+app.post('/timer/start', () => {
+  startTimer();       
+});
+
+app.post('/timer/stop', () => {  
+  stopTimer();       
+});
+
+app.post('/timer/resume', () => {  
+  resumeTimer();       
+});
+
+app.post('/timer/reset', () => {
+  resetTimer();       
+});
+
 
 /*app.get('/timer', (req, res) => {        
     res.json({timer: timeLeft});
