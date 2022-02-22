@@ -106,35 +106,42 @@ app.get('/timer/time', (req, res) => {
 });
 
 
-app.post('/stopper/start', () => {
+app.post('/stopper/start', (req, res) => {
   stopwatch.start();        
-  console.log(stopwatch.read());
+  //console.log(stopwatch.read());
+  res.sendStatus(200);
 });
 
-app.post('/stopper/reset', () => {
+app.post('/stopper/reset', (req, res) => {
   stopwatch.reset();
-  console.log(stopwatch.read());        
+  //console.log(stopwatch.read());  
+  res.sendStatus(200);      
 });
 
-app.post('/stopper/stop', () => {
+app.post('/stopper/stop', (req, res) => {
   stopwatch.stop();  
-  console.log(stopwatch.read());       
+  //console.log(stopwatch.read());       
+  res.sendStatus(200);
 });
 
-app.post('/timer/start', () => {
-  startTimer();       
+app.post('/timer/start', (req, res) => {
+  startTimer();     
+  res.sendStatus(200);  
 });
 
-app.post('/timer/stop', () => {  
-  stopTimer();       
+app.post('/timer/stop', (req, res) => {  
+  stopTimer();    
+  res.sendStatus(200);   
 });
 
-app.post('/timer/resume', () => {  
+app.post('/timer/resume', (req, res) => {  
   resumeTimer();       
+  res.sendStatus(200);
 });
 
-app.post('/timer/reset', () => {
+app.post('/timer/reset', (req, res) => {
   resetTimer();       
+  res.sendStatus(200);
 });
 
 
