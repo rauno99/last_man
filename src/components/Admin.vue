@@ -164,7 +164,6 @@
     mounted() {
         this.timePollInterval = setInterval(() => this.getTimes(), 900);
         this.getPlayers();
-        this.threadPollInterval = setInterval(() => this.checkThreads(), 1000)
     },
 };
 </script>

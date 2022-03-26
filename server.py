@@ -15,14 +15,14 @@ CORS(app)
 stopwatch_thread = None
 timer_thread = None
 
+stopwatch_stop_flag = False
+timer_stop_flag = False
+
 stopwatch_value = 0
 timer_value = 0
 
 players = {}
 tasks = {}
-
-stopwatch_stop_flag = False
-timer_stop_flag = False
 
 def time_convert(sec):
     sec = floor(sec)
@@ -33,10 +33,8 @@ def time_convert(sec):
 
     if sec < 10:
         sec = "0" + str(sec)
-
     if mins < 10:
         mins = "0" + str(mins)
-
     if hours < 10:
         hours = "0" + str(hours)
 
@@ -83,10 +81,13 @@ def get_stopper_time():
 @app.route("/stopper/start", methods=["POST"])
 def start_stopper():
     global stopwatch_thread, stopwatch_stop_flag
-    stopwatch_stop_flag = False
-    stopwatch_thread = Thread(target=stopwatch)
-    stopwatch_thread.start()
-    return "Stopper käib", 200
+    if stopwatch_thread != None and not stopwatch_thread.is_alive() or stopwatch_thread == None:
+
+        stopwatch_stop_flag = False
+        stopwatch_thread = Thread(target=stopwatch)
+        stopwatch_thread.start()
+        return "Stopper käib", 200
+    return "Stopper juba käib", 200
 
 @app.route("/stopper/reset", methods=["POST"])
 def reset_stopper():
@@ -112,20 +113,33 @@ def get_timer_time():
 
 @app.route("/timer/start", methods=["POST"])
 def start_timer():
-    global timer_thread
-    data = request.json
-    duration = data["duration"]
-    timer_thread = Thread(target=timer, args=(duration,))
-    timer_thread.start()
-    return "", 200
+    global timer_thread, timer_stop_flag
+    if timer_thread != None and not timer_thread.is_alive() or timer_thread == None:
+
+        data = request.json
+        duration = data["duration"]
+        timer_stop_flag = False
+        timer_thread = Thread(target=timer, args=(duration,))
+        timer_thread.start()
+        return "Taimer käib", 200
+    return "Taimer juba käib", 200
 
 @app.route("/timer/stop", methods=["POST"])
-def stop_timer():
-    pass
+def pause_timer():
+    global timer_thread, timer_stop_flag
+
+    timer_stop_flag = True
+    timer_thread.join()
+    return "Taimer seisab", 200
 
 @app.route("/timer/reset", methods=["POST"])
 def reset_timer():
-    pass
+    global timer_value, timer_stop_flag, timer_thread
+
+    timer_stop_flag = True
+    timer_thread.join()
+    timer_value = 0
+    return "timer reset", 200
 
 @app.route("/timer/resume", methods=["POST"])
 def resume_timer():
@@ -158,11 +172,15 @@ def add_player():
     update_players_file()
     return jsonify(players), 200
 
+@app.route("/player/remove/<name>", methods=["POST"])
+def remove_player(name):
+    players.pop(name)
+    update_players_file()
+    return jsonify(players), 200
 
 if __name__ == "__main__":
     read_players()
-    #print(players)
+    read_tasks()
+    #print(tasks.items())
     app.run(host="0.0.0.0", port=5000, debug=False)
-
-
 
