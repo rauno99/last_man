@@ -2,7 +2,6 @@
 
 #MVP-d:
 #Markus, Markus, Samsungi monitor, huge ass chonky Samsungi monitor, Robert
-import random
 from math import floor
 from flask import Flask, jsonify, request
 from flask_cors import CORS
@@ -76,37 +75,35 @@ def read_tasks():
     with open("tasks_database.json") as tasks_database:
         tasks = json.load(tasks_database)
 
-@app.route("/stopper/time", methods=["POST", "GET"])
+@app.route("/stopper/time", methods=["GET"])
 def get_stopper_time():
     global stopwatch_value
     return jsonify({"stopwatch": time_convert(stopwatch_value)})
 
-@app.route("/stopper/start", methods=["POST", "GET"])
+@app.route("/stopper/start", methods=["POST"])
 def start_stopper():
-    global stopwatch_thread
-    global stopwatch_stop_flag
-    stopwatch_stop_flag = True
+    global stopwatch_thread, stopwatch_stop_flag
+    stopwatch_stop_flag = False
     stopwatch_thread = Thread(target=stopwatch)
     stopwatch_thread.start()
-    return "Stopper käib"
+    return "Stopper käib", 200
 
 @app.route("/stopper/reset", methods=["POST"])
 def reset_stopper():
-    global stopwatch_value
-    global stopwatch_stop_flag
-    global stopwatch_thread
+    global stopwatch_value, stopwatch_stop_flag, stopwatch_thread
 
     stopwatch_stop_flag = True
     stopwatch_thread.join()
     stopwatch_value = 0
+    return "stopper reset", 200
 
 @app.route("/stopper/stop", methods=["POST"])
 def pause_stopper():
-    global stopwatch_thread
-    global stopwatch_thread
+    global stopwatch_thread, stopwatch_stop_flag
 
     stopwatch_stop_flag = True
     stopwatch_thread.join()
+    return "Stopper stopped", 200
 
 @app.route("/timer/time", methods=["GET"])
 def get_timer_time():
@@ -134,19 +131,24 @@ def reset_timer():
 def resume_timer():
     pass
 
-@app.route("/fail/add/<name>", methods=["POST", "GET"])
+@app.route("/player/get", methods=["GET"])
+def get_players():
+    return jsonify(players), 200
+
+@app.route("/fail/add/<name>", methods=["POST"])
 def add_fail(name):
     players[name] += 1
     update_players_file()
-    return str(players.get("Robert"))
+    return jsonify(players), 200
 
-@app.route("/fail/remove/<name>", methods=["POST", "GET"])
+@app.route("/fail/remove/<name>", methods=["POST"])
 def remove_fail(name):
-    players[name] -= 1
-    update_players_file()
     if players[name] <= 0:
-        return "U dead sucker"
-    return str(players.get(name))
+        players[name] = 0
+    else:
+        players[name] -= 1
+    update_players_file()
+    return jsonify(players), 200
 
 @app.route("/player/add", methods=["POST"])
 def add_player():
@@ -154,7 +156,7 @@ def add_player():
     print(data)
     players[data["name"]] = 0
     update_players_file()
-    return "", 200
+    return jsonify(players), 200
 
 
 if __name__ == "__main__":

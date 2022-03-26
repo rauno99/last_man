@@ -30,8 +30,28 @@
             <b-row>
                 <b-col>
                 <input v-model="playerName" placeholder="Name">
-                <br>
-                <b-button @click="addPlayer">Add player</b-button>
+                <b-button class="m-3" @click="addPlayer">Add player</b-button>
+                </b-col>
+            </b-row>
+            <b-row>
+                <b-col>
+                <table>
+                    <thead>
+                        <tr>
+                            <th class="playerNames">Mangija nimi</th>
+                            <th class="playerNames">Fails</th> 
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="(value, key) in players" :key="key">
+                            <td class="playerNames">{{key}}</td>
+                            <td class="playerX">{{calcX(value)}}</td>
+                            <td><b-button @click="addFail(key)">+</b-button></td>
+                            <td><b-button @click="removeFail(key)">-</b-button></td>
+                            <td><b-button @click="removePlayer(key)">Remove</b-button></td>
+                        </tr>
+                    </tbody>
+                </table>
                 </b-col>
             </b-row>
         </b-container>
@@ -50,7 +70,8 @@
                 timePollInterval: null,
                 playerName: '',
                 timerDuration: '',
-                ip: window.location.hostname
+                ip: window.location.hostname,
+                players: {}
             }
         },
         methods: {
@@ -63,7 +84,7 @@
                 .then((res) => (this.timer = res.data));
         },
         startStopper: function () {
-            axios.post("http://" + this.ip + ":5000/stopper/start");
+            axios.post("http://" + this.ip + ":5000/stopper/start").then((response) => {console.log(response)});
         },
         resetStopper: function () {
             axios.post("http://" + this.ip + ":5000/stopper/reset");
@@ -89,20 +110,42 @@
         stopTimer: function () {
             axios.post("http://" + this.ip + ":5000/timer/stop");
         },
+        getPlayers: function() {
+            axios
+                .get("http://" + this.ip + ":5000/player/get")
+                .then((res) => (this.players = res.data));     
+        },
         addPlayer: function() {
             if (this.playerName != '') {
                 axios.post("http://" + this.ip + ":5000/player/add", {
                     "name": this.playerName
                 }).then((response) => {
                     this.playerName = ''
+                    this.players = response.data
                     console.log(response)
                 });
             }
         },
+        addFail: function(name) {
+            axios.post("http://" + this.ip + ":5000/fail/add/" + name)
+            .then((response) => {
+                this.players = response.data
+            });
+        },
+        removeFail: function(name) {
+            axios.post("http://" + this.ip + ":5000/fail/remove/" + name)
+            .then((response) => {
+                this.players = response.data
+            });
+        },
+        calcX: function(n) {
+            return "X".repeat(n)
+        }
     },
 
     mounted() {
-        this.timePollInterval = setInterval(() => this.getTimes(), 800);
+        this.timePollInterval = setInterval(() => this.getTimes(), 900);
+        this.getPlayers();
     },
 };
 </script>
@@ -121,5 +164,30 @@
     color: gray;
     font-weight: 300;
     font-size: 200%;
+}
+
+.playerNames {
+    font-family: "Roboto", sans-serif;
+    color: gray;
+    font-weight: 300;
+    font-size: 200%;
+}
+
+.playerX {
+    font-family: "Roboto", sans-serif;
+    color: darkred;
+    font-weight: 300;
+    font-size: 150%;
+}
+
+
+table th {
+    padding: 20px;
+    border-bottom: 1px solid gray;
+}
+
+table td {
+  text-align: left;
+  padding: 20px;
 }
 </style>

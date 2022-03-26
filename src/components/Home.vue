@@ -17,6 +17,26 @@
                     <h1 v-else class="time">{{ timer.timer }}</h1>
                 </b-col>
             </b-row>
+            <hr>
+            <b-row class="text-center">
+                <b-col>
+                <table>
+                    <thead>
+                        <tr>
+                            <th class="playerNames">Mängija nimi</th>
+                            <th class="playerNames">Fails</th> 
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="(value, key) in players" :key="key">
+                            <td class="playerNames">{{key}}</td>
+                            <td class="playerX">{{calcX(value)}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+                </b-col>
+            </b-row>
+
         </b-container>
     </div>
 </template>
@@ -31,7 +51,8 @@ export default {
             timer: "",
             stopper: "",
             timePollInterval: null,
-            ip: window.location.hostname
+            ip: window.location.hostname,
+            players: {}
         };
     },
     methods: {
@@ -43,11 +64,20 @@ export default {
                 .get("http://" + this.ip + ":5000/timer/time")
                 .then((res) => (this.timer = res.data));
         },
+
+        getPlayers: function() {
+            axios
+                .get("http://" + this.ip + ":5000/player/get")
+                .then((res) => (this.players = res.data));     
+        },
+        calcX: function(n) {
+            return "X".repeat(n)
+        }
     },
 
     mounted() {
-        this.timePollInterval = setInterval(() => this.getTimes(), 500);
-        console.log(this.ip)
+        this.timePollInterval = setInterval(() => this.getTimes(), 900);
+        this.getPlayers();
     },
 };
 </script>
@@ -67,4 +97,31 @@ export default {
     font-weight: 300;
     font-size: 200%;
 }
+
+.playerNames {
+    font-family: "Roboto", sans-serif;
+    color: gray;
+    font-weight: 300;
+    font-size: 200%;
+}
+
+.playerX {
+    font-family: "Roboto", sans-serif;
+    color: darkred;
+    font-weight: 300;
+    font-size: 150%;
+}
+
+
+table th {
+    padding: 20px;
+    border-bottom: 1px solid gray;
+}
+
+table td {
+  text-align: left;
+  padding: 20px;
+}
+
+
 </style>
