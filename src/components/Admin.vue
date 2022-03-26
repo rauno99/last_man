@@ -126,6 +126,13 @@
                 });
             }
         },
+        removePlayer: function(name) {
+            axios.post("http://" + this.ip + ":5000/player/remove/" + name)
+            .then((response) => {
+                this.players = response.data
+            });
+        },
+
         addFail: function(name) {
             axios.post("http://" + this.ip + ":5000/fail/add/" + name)
             .then((response) => {
