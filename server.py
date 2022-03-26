@@ -2,7 +2,8 @@
 
 #MVP-d:
 #Markus, Markus, Samsungi monitor, huge ass chonky Samsungi monitor, Robert
-
+import random
+from math import floor
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from threading import Thread
@@ -19,19 +20,36 @@ stopwatch_value = 0
 timer_value = 0
 
 players = {}
+tasks = {}
+
+stopwatch_stop_flag = False
+timer_stop_flag = False
 
 def time_convert(sec):
-  mins = sec // 60
-  sec = sec % 60
-  hours = mins // 60
-  mins = mins % 60
-  return str(hours) + ":" + str(mins) + ":" + str(sec)
+    sec = floor(sec)
+    mins = sec // 60
+    sec = sec % 60
+    hours = mins // 60
+    mins = mins % 60
+
+    if sec < 10:
+        sec = "0" + str(sec)
+
+    if mins < 10:
+        mins = "0" + str(mins)
+
+    if hours < 10:
+        hours = "0" + str(hours)
+
+    return str(hours) + ":" + str(mins) + ":" + str(sec)
 
 def stopwatch():
     global stopwatch_value
     start = time.time()
 
     while True:
+        if stopwatch_stop_flag:
+            break
         stopwatch_value = time.time() - start
 
 def timer(duration):
@@ -39,18 +57,24 @@ def timer(duration):
     start = time.time()
 
     while True:
+        if timer_stop_flag:
+            break
         timer_value = duration - (time.time() - start)
 
 def read_players():
     global players
-    with open("players_database.json") as database:
-        players = json.load(database)
+    with open("players_database.json") as players_database:
+        players = json.load(players_database)
 
 def update_players_file():
     global players
     with open("players_database.json", "w") as database:
         json.dump(players, database)
 
+def read_tasks():
+    global tasks
+    with open("tasks_database.json") as tasks_database:
+        tasks = json.load(tasks_database)
 
 @app.route("/stopper/time", methods=["POST", "GET"])
 def get_stopper_time():
@@ -60,25 +84,43 @@ def get_stopper_time():
 @app.route("/stopper/start", methods=["POST", "GET"])
 def start_stopper():
     global stopwatch_thread
+    global stopwatch_stop_flag
+    stopwatch_stop_flag = True
     stopwatch_thread = Thread(target=stopwatch)
     stopwatch_thread.start()
     return "Stopper käib"
 
 @app.route("/stopper/reset", methods=["POST"])
 def reset_stopper():
-    pass
+    global stopwatch_value
+    global stopwatch_stop_flag
+    global stopwatch_thread
+
+    stopwatch_stop_flag = True
+    stopwatch_thread.join()
+    stopwatch_value = 0
 
 @app.route("/stopper/stop", methods=["POST"])
 def pause_stopper():
     global stopwatch_thread
+    global stopwatch_thread
+
+    stopwatch_stop_flag = True
+    stopwatch_thread.join()
 
 @app.route("/timer/time", methods=["GET"])
 def get_timer_time():
-    pass
+    global timer_value
+    return jsonify({"timer": time_convert(timer_value)})
 
 @app.route("/timer/start", methods=["POST"])
 def start_timer():
-    pass
+    global timer_thread
+    data = request.json
+    duration = data["duration"]
+    timer_thread = Thread(target=timer, args=(duration,))
+    timer_thread.start()
+    return "", 200
 
 @app.route("/timer/stop", methods=["POST"])
 def stop_timer():
@@ -106,10 +148,19 @@ def remove_fail(name):
         return "U dead sucker"
     return str(players.get(name))
 
+@app.route("/player/add", methods=["POST"])
+def add_player():
+    data = request.json
+    print(data)
+    players[data["name"]] = 0
+    update_players_file()
+    return "", 200
+
 
 if __name__ == "__main__":
     read_players()
     #print(players)
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    app.run(host="0.0.0.0", port=5000, debug=False)
+
 
 

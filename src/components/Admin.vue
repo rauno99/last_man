@@ -92,9 +92,9 @@
         addPlayer: function() {
             if (this.playerName != '') {
                 axios.post("http://" + this.ip + ":5000/player/add", {
-                    "name": this.player
+                    "name": this.playerName
                 }).then((response) => {
-                    this.player = ''
+                    this.playerName = ''
                     console.log(response)
                 });
             }
@@ -102,7 +102,7 @@
     },
 
     mounted() {
-        this.timePollInterval = setInterval(() => this.getTimes(), 500);
+        this.timePollInterval = setInterval(() => this.getTimes(), 800);
     },
 };
 </script>
