@@ -40,42 +40,43 @@
                 timer: '',
                 stopper: '',
                 timePollInterval: null,
-                playerName: ''
+                playerName: '',
+                ip: window.location.hostname
             }
         },
         methods: {
         getTimes: function () {
             axios
-                .get("http://192.168.1.156:5000/stopper/time")
+                .get("http://" + this.ip + ":5000/stopper/time")
                 .then((res) => (this.stopper = res.data));
             axios
-                .get("http://192.168.1.156:5000/timer/time")
+                .get("http://" + this.ip + ":5000/timer/time")
                 .then((res) => (this.timer = res.data));
         },
         startStopper: function () {
-            axios.post("http://192.168.1.156:5000/stopper/start");
+            axios.post("http://" + this.ip + ":5000/stopper/start");
         },
         resetStopper: function () {
-            axios.post("http://192.168.1.156:5000/stopper/reset");
+            axios.post("http://" + this.ip + ":5000/stopper/reset");
         },
         stopStopper: function () {
-            axios.post("http://192.168.1.156:5000/stopper/stop");
+            axios.post("http://" + this.ip + ":5000/stopper/stop");
         },
         startTimer: function () {
-            axios.post("http://192.168.1.156:5000/timer/start");
+            axios.post("http://" + this.ip + ":5000/timer/start");
         },
         resumeTimer: function () {
-            axios.post("http://192.168.1.156:5000/timer/resume");
+            axios.post("http://" + this.ip + ":5000/timer/resume");
         },
         resetTimer: function () {
-            axios.post("http://192.168.1.156:5000/timer/reset");
+            axios.post("http://" + this.ip + ":5000/timer/reset");
         },
         stopTimer: function () {
-            axios.post("http://192.168.1.156:5000/timer/stop");
+            axios.post("http://" + this.ip + ":5000/timer/stop");
         },
         addPlayer: function() {
             if (this.playerName != '') {
-                axios.post("http://192.168.156:500/player/add", {
+                axios.post("http://" + this.ip + ":5000/player/add", {
                     "name": this.playerName,
                     "fails": 0
                 }).then((response) => {

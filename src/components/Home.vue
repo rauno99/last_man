@@ -31,21 +31,23 @@ export default {
             timer: "",
             stopper: "",
             timePollInterval: null,
+            ip: window.location.hostname
         };
     },
     methods: {
         getTimes: function () {
             axios
-                .get("http://192.168.1.156:5000/stopper/time")
+                .get("http://" + this.ip + ":5000/stopper/time")
                 .then((res) => (this.stopper = res.data));
             axios
-                .get("http://192.168.1.156:5000/timer/time")
+                .get("http://" + this.ip + ":5000/timer/time")
                 .then((res) => (this.timer = res.data));
         },
     },
 
     mounted() {
         this.timePollInterval = setInterval(() => this.getTimes(), 500);
+        console.log(this.ip)
     },
 };
 </script>
