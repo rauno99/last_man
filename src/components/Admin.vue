@@ -3,27 +3,35 @@
         <b-container fluid>
             <b-row class=text-center>
                 <b-col>
-                <h2 class="timeTitle">Seistud aeg</h2>
-                <h1 class="time" v-if="stopper.stopwatch==='NaN:NaN:NaN'">00:00:00</h1>
-                <h1 class="time" v-else>{{ stopper.stopwatch }}</h1>
+                    <h2 class="timeTitle">Seistud aeg</h2>
+                    <h1 class="time" v-if="stopper.stopwatch==='NaN:NaN:NaN'">00:00:00</h1>
+                    <h1 class="time" v-else>{{ stopper.stopwatch }}</h1>
                 </b-col>
                 <b-col>
-                <h2 class="timeTitle">Järgmise ülesandeni</h2>
-                <h1 class="time" v-if="timer.timer==='NaN:NaN:NaN'">00:00:00</h1>
-                <h1 v-else class="time">{{ timer.timer }}</h1>
+                    <h2 class="timeTitle">Järgmise ülesandeni</h2>
+                    <h1 class="time" v-if="timer.timer==='NaN:NaN:NaN'">00:00:00</h1>
+                    <h1 v-else class="time">{{ timer.timer }}</h1>
                 </b-col>
             </b-row>
-            <b-button @click="startStopper">start stopper</b-button>
-            <b-button @click="startTimer">start</b-button>
-            <b-button @click="resetTimer">reset</b-button>
-            <b-button @click="resumeTimer">resume</b-button>
-            <b-button @click="stopTimer">stop</b-button>
+            <b-row class=text-center>
+                <b-col>
+                    <b-button class="m-1" @click="startStopper">Start</b-button>
+                    <b-button class="m-1" @click="resetStopper">Reset</b-button>
+                    <b-button class="m-1" @click="stopStopper">Stop</b-button>
+                </b-col>
+                <b-col>
+                    <input v-model="timerDuration" placeholder="Minutes">
+                    <b-button class="m-1" @click="startTimer">Start</b-button>
+                    <b-button class="m-1" @click="resumeTimer">Resume</b-button>
+                    <b-button class="m-1" @click="stopTimer">Stop</b-button>
+                </b-col>
+            </b-row>
             <hr>
             <b-row>
                 <b-col>
                 <input v-model="playerName" placeholder="Name">
                 <br>
-                <b-button>Add player</b-button>
+                <b-button @click="addPlayer">Add player</b-button>
                 </b-col>
             </b-row>
         </b-container>
@@ -41,6 +49,7 @@
                 stopper: '',
                 timePollInterval: null,
                 playerName: '',
+                timerDuration: '',
                 ip: window.location.hostname
             }
         },
@@ -63,7 +72,13 @@
             axios.post("http://" + this.ip + ":5000/stopper/stop");
         },
         startTimer: function () {
-            axios.post("http://" + this.ip + ":5000/timer/start");
+            this.timerDuration = this.timerDuration * 60
+            axios.post("http://" + this.ip + ":5000/timer/start", {
+                "duration": this.timerDuration
+            }).then((response) => {
+                this.timerDuration = ''
+                console.log(response)
+            });
         },
         resumeTimer: function () {
             axios.post("http://" + this.ip + ":5000/timer/resume");
@@ -77,9 +92,9 @@
         addPlayer: function() {
             if (this.playerName != '') {
                 axios.post("http://" + this.ip + ":5000/player/add", {
-                    "name": this.playerName,
-                    "fails": 0
+                    "name": this.player
                 }).then((response) => {
+                    this.player = ''
                     console.log(response)
                 });
             }
