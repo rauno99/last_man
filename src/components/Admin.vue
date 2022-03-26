@@ -71,7 +71,10 @@
                 playerName: '',
                 timerDuration: '',
                 ip: window.location.hostname,
-                players: {}
+                players: {},
+                stopperAlive: false,
+                timerAlive: false,
+                threadPollInterval: null
             }
         },
         methods: {
@@ -143,7 +146,15 @@
             axios.post("http://" + this.ip + ":5000/fail/remove/" + name)
             .then((response) => {
                 this.players = response.data
-            });
+            });      
+        },
+        checkThreads: function() {
+            axios
+                .get("http://" + this.ip + ":5000/stopper/check")
+                .then((res) => (console.log(res.data)));    
+            axios
+                .get("http://" + this.ip + ":5000/timer/check")
+                .then((res) => (console.log(res.data)));    
         },
         calcX: function(n) {
             return "X".repeat(n)
@@ -153,6 +164,7 @@
     mounted() {
         this.timePollInterval = setInterval(() => this.getTimes(), 900);
         this.getPlayers();
+        this.threadPollInterval = setInterval(() => this.checkThreads(), 1000)
     },
 };
 </script>
