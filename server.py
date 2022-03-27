@@ -75,9 +75,10 @@ def read_tasks():
 
 def choose_tasks():
     global tasks
-    tasks_choice = {}
-    tasks_choice["tasks"] = tasks["tasks"][:1]
-    return tasks_choice
+    #vajab tööd
+    #tasks_choice = {}
+    #tasks_choice["tasks"] = tasks["tasks"][:1]
+    return tasks
 
 def update_tasks_file():
     global tasks
@@ -202,9 +203,9 @@ def add_task_vote(id):
     return str(tasks["tasks"][0][id]["votes"]), 200
 #remove pole vaja vist?
 
-@app.route("/voting/tasks/results", methods="GET")
+@app.route("/voting/tasks/results", methods=["GET"])
 def get_voting_results():
-    pass
+    return ""
 
 #TODO: mängijate hääletus, hääletuse tulemused, kuidas hallata juba hääletuses käinud asju,
 #TODO: ühest seadmest ühe hääle lubamine, hääletuse start
@@ -215,6 +216,8 @@ if __name__ == "__main__":
 
     #see on täitsa oiž
     #print(tasks["tasks"][0]["1"]["votes"])
+    #print(tasks["tasks"][0].keys())
+
 
     app.run(host="0.0.0.0", port=5000, debug=False)
 
