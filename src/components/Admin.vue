@@ -148,14 +148,6 @@
                 this.players = response.data
             });      
         },
-        checkThreads: function() {
-            axios
-                .get("http://" + this.ip + ":5000/stopper/check")
-                .then((res) => (console.log(res.data)));    
-            axios
-                .get("http://" + this.ip + ":5000/timer/check")
-                .then((res) => (console.log(res.data)));    
-        },
         calcX: function(n) {
             return "X".repeat(n)
         }
