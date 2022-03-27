@@ -65,13 +65,24 @@ def read_players():
 
 def update_players_file():
     global players
-    with open("players_database.json", "w") as database:
-        json.dump(players, database)
+    with open("players_database.json", "w") as players_database:
+        json.dump(players, players_database)
 
 def read_tasks():
     global tasks
     with open("tasks_database.json") as tasks_database:
         tasks = json.load(tasks_database)
+
+def choose_tasks():
+    global tasks
+    tasks_choice = {}
+    tasks_choice["tasks"] = tasks["tasks"][:1]
+    return tasks_choice
+
+def update_tasks_file():
+    global tasks
+    with open("tasks_database.json", "w") as tasks_database:
+        json.dump(tasks, tasks_database)
 
 @app.route("/stopper/time", methods=["GET"])
 def get_stopper_time():
@@ -178,9 +189,32 @@ def remove_player(name):
     update_players_file()
     return jsonify(players), 200
 
+@app.route("/voting/tasks", methods=["GET"])
+def send_tasks():
+    chosen_tasks = choose_tasks()
+    return jsonify(chosen_tasks), 200
+
+#id on see nr enne kõiki teisi asju, sama väärtusega, mis value
+@app.route("/voting/tasks/addvote/<id>", methods=["POST", "GET"])
+def add_task_vote(id):
+    tasks["tasks"][0][id]["votes"] += 1
+    update_tasks_file()
+    return str(tasks["tasks"][0][id]["votes"]), 200
+#remove pole vaja vist?
+
+@app.route("/voting/tasks/results", methods="GET")
+def get_voting_results():
+    pass
+
+#TODO: mängijate hääletus, hääletuse tulemused, kuidas hallata juba hääletuses käinud asju,
+#TODO: ühest seadmest ühe hääle lubamine, hääletuse start
+
 if __name__ == "__main__":
     read_players()
     read_tasks()
-    #print(tasks.items())
+
+    #see on täitsa oiž
+    #print(tasks["tasks"][0]["1"]["votes"])
+
     app.run(host="0.0.0.0", port=5000, debug=False)
 
