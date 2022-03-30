@@ -54,6 +54,11 @@
                 </table>
                 </b-col>
             </b-row>
+            <b-row>
+                <b-col>
+                    <vue-poll v-bind="pollOptions" />
+                </b-col>
+            </b-row>
         </b-container>
 
     </div>
@@ -61,8 +66,13 @@
 
 <script>
     import axios from "axios"
+    import VuePoll from "vue-poll";
+
     export default {
         name: "Admin",
+        components: {
+            VuePoll
+        },
         data() {
             return {
                 timer: '',
@@ -74,7 +84,17 @@
                 players: {},
                 stopperAlive: false,
                 timerAlive: false,
-                threadPollInterval: null
+                threadPollInterval: null,
+                pollOptions: {
+                question: "Järgmine ülesanne",
+                answers: [
+                    { value: 1, text: 'yl1', votes: 0 },
+                    { value: 2, text: 'yl2', votes: 0 },
+                    { value: 3, text: 'yl3', votes: 0 },
+                    { value: 4, text: 'yl4', votes: 0 } 
+                ],
+                showResults: true
+            },
             }
         },
         methods: {
@@ -150,12 +170,20 @@
         },
         calcX: function(n) {
             return "X".repeat(n)
-        }
+        },
+        getTasks: function() {
+            axios
+                .get("http://" + this.ip + ":5000/voting/tasks")
+                .then((res) => {
+                    this.pollOptions.answers = res.data
+                });
+        },
     },
 
     mounted() {
         this.timePollInterval = setInterval(() => this.getTimes(), 900);
         this.getPlayers();
+        this.getTasks()
     },
 };
 </script>

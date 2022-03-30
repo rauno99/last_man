@@ -38,7 +38,8 @@
             </b-row>
             <b-row>
                 <b-col>
-                    <vue-poll v-bind="pollOptions" @addVote="addVote" />
+                    <vue-poll v-if="showPoll" v-bind="pollOptions" @addvote="addVote" />
+                    <h1 class="timeTitle" v-else>"Hääletatud!"</h1>
                 </b-col>
             </b-row>
 
@@ -70,7 +71,8 @@ export default {
                     { value: 3, text: 'yl3', votes: 0 },
                     { value: 4, text: 'yl4', votes: 0 } 
                 ]
-            }
+            },
+            showPoll: true
         };
     },
     methods: {
@@ -94,10 +96,13 @@ export default {
         getTasks: function() {
             axios
                 .get("http://" + this.ip + ":5000/voting/tasks")
-                .then((res) => (this.pollOptions.answers = res.data.tasks));
+                .then((res) => {
+                    this.pollOptions.answers = res.data
+                });
         },
-        addVote(obj){
-            console.log('You voted ' + obj.value + '!');
+        addVote: function(obj) {
+            this.showPoll = false
+            axios.post("http://" + this.ip + ":5000/voting/tasks/addvote/" + obj.value.toString())
         }
     },
 
