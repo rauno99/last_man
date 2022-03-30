@@ -58,28 +58,44 @@ def timer(duration):
             break
         timer_value = duration - (time.time() - start)
 
+
 def read_players():
     global players
-    with open("players_database.json") as players_database:
+    with open("players_database.json", encoding="utf8") as players_database:
         players = json.load(players_database)
 
 def update_players_file():
     global players
-    with open("players_database.json", "w") as players_database:
+    with open("players_database.json", "w", encoding="utf8") as players_database:
         json.dump(players, players_database)
 
 def read_tasks():
     global tasks
-    with open("tasks_database.json") as tasks_database:
+    with open("tasks_database.json", encoding="utf8") as tasks_database:
         tasks = json.load(tasks_database)
 
 def choose_tasks():
     global tasks
-    return list(tasks["tasks"][0].values())[:2]
+
+    choices_needed = 2
+    chosen_amount = 0
+    choice = []
+
+    for i in range(len(tasks["tasks"][0])):
+        candidate = tasks["tasks"][0][str(i + 1)]
+        if candidate["include"] == 1:
+            choice.append(candidate)
+            tasks["tasks"][0][str(i + 1)]["include"] = 0
+            update_tasks_file()
+            chosen_amount += 1
+            if chosen_amount >= choices_needed:
+                break
+
+    return choice
 
 def update_tasks_file():
     global tasks
-    with open("tasks_database.json", "w") as tasks_database:
+    with open("tasks_database.json", "w", encoding="utf8") as tasks_database:
         json.dump(tasks, tasks_database)
 
 @app.route("/stopper/time", methods=["GET"])
@@ -193,7 +209,7 @@ def send_tasks():
     return jsonify(chosen_tasks), 200
 
 #id on see nr enne kõiki teisi asju, sama väärtusega, mis value
-@app.route("/voting/tasks/addvote/<id>", methods=["POST", "GET"])
+@app.route("/voting/tasks/addvote/<id>", methods=["POST"])
 def add_task_vote(id):
     tasks["tasks"][0][id]["votes"] += 1
     update_tasks_file()
@@ -204,7 +220,7 @@ def add_task_vote(id):
 def get_voting_results():
     return ""
 
-#TODO: mängijate hääletus, hääletuse tulemused, kuidas hallata juba hääletuses käinud asju,
+#TODO: mängijate hääletus, hääletuse tulemused,
 #TODO: ühest seadmest ühe hääle lubamine, hääletuse start
 
 if __name__ == "__main__":
