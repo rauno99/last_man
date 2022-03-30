@@ -1,1 +1,21 @@
-{"tasks": [{"1": {"value": 1, "text": "s\u00c3\u00b5lme tegemine", "votes": 7}, "2": {"value": 2, "text": "peast arvutamine", "votes": 6}}]}
+{
+  "tasks": [
+    {
+      "1": {
+        "value": 1,
+        "text": "s\u00c3\u00b5lme tegemine",
+        "votes": 7
+      },
+      "2": {
+        "value": 2,
+        "text": "peast arvutamine",
+        "votes": 6
+      },
+      "3": {
+        "value": 3,
+        "text": "ühel jalal seismine",
+        "votes": 6
+      }
+    }
+  ]
+}

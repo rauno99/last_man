@@ -75,10 +75,7 @@ def read_tasks():
 
 def choose_tasks():
     global tasks
-    #vajab tööd
-    #tasks_choice = {}
-    #tasks_choice["tasks"] = tasks["tasks"][:1]
-    return tasks
+    return list(tasks["tasks"][0].values())[:2]
 
 def update_tasks_file():
     global tasks
@@ -216,7 +213,7 @@ if __name__ == "__main__":
 
     #see on täitsa oiž
     #print(tasks["tasks"][0]["1"]["votes"])
-    #print(tasks["tasks"][0].keys())
+    #print(list(tasks["tasks"][0].values())[:2])
 
 
     app.run(host="0.0.0.0", port=5000, debug=False)
