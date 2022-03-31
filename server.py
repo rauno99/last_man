@@ -23,6 +23,7 @@ timer_value = 0
 
 players = {}
 tasks = {}
+last_used_taskset = 0
 
 def time_convert(sec):
     sec = floor(sec)
@@ -70,9 +71,10 @@ def update_players_file():
         json.dump(players, players_database)
 
 def read_tasks():
-    global tasks
+    global tasks, last_used_taskset
     with open("tasks_database.json", encoding="utf8") as tasks_database:
         tasks = json.load(tasks_database)
+    last_used_taskset = tasks["last_used"]
 
 def choose_tasks():
     global tasks
@@ -205,7 +207,8 @@ def remove_player(name):
 
 @app.route("/voting/tasks", methods=["GET"])
 def send_tasks():
-    chosen_tasks = choose_tasks()
+    taskset = "tasks" + str(last_used_taskset + 1)
+    chosen_tasks = tasks[taskset]
     return jsonify(chosen_tasks), 200
 
 #id on see nr enne kõiki teisi asju, sama väärtusega, mis value
@@ -216,12 +219,18 @@ def add_task_vote(id):
     return str(tasks["tasks"][0][id]["votes"]), 200
 #remove pole vaja vist?
 
-@app.route("/voting/tasks/results", methods=["GET"])
-def get_voting_results():
-    return ""
+@app.route("/voting/end", methods=["GET"])
+def end_voting():
+    global last_used_taskset
+    #send_tasks()
+    last_used_taskset += 1
+    #send_tasks() again
+    #saa vastavad tulemused, suurenda last_used, saa uued taskid
 
 #TODO: mängijate hääletus, hääletuse tulemused,
 #TODO: ühest seadmest ühe hääle lubamine, hääletuse start
+
+#server käima, esimene hääletus tasks1. Lõpp, järgmine tasks2
 
 if __name__ == "__main__":
     read_players()
