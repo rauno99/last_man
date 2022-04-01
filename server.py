@@ -57,7 +57,8 @@ def timer(duration):
     start = time.time()
 
     while True:
-        if timer_stop_flag:
+        if timer_stop_flag or timer_value < 0:
+            timer_value = 0
             break
         timer_value = duration - (time.time() - start)
 
