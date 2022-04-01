@@ -97,6 +97,7 @@ export default {
             axios
                 .get("http://" + this.ip + ":5000/voting/tasks")
                 .then((res) => {
+                    console.log(res)
                     this.pollOptions.answers = res.data
                 });
         },

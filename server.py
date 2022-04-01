@@ -25,6 +25,8 @@ players = {}
 tasks = {}
 last_used_taskset = 0
 
+winner_task = ""
+
 def time_convert(sec):
     sec = floor(sec)
     mins = sec // 60
@@ -99,6 +101,13 @@ def update_tasks_file():
     global tasks
     with open("tasks_database.json", "w", encoding="utf8") as tasks_database:
         json.dump(tasks, tasks_database)
+
+def update_last_used():
+    global last_used_taskset
+
+    last_used_taskset += 1
+    tasks["last_used"] += 1
+    update_tasks_file()
 
 @app.route("/stopper/time", methods=["GET"])
 def get_stopper_time():
@@ -208,27 +217,43 @@ def remove_player(name):
 @app.route("/voting/tasks", methods=["GET"])
 def send_tasks():
     taskset = "tasks" + str(last_used_taskset + 1)
-    chosen_tasks = tasks[taskset]
+    chosen_tasks = list(tasks[taskset][0].values())
+    print(chosen_tasks)
     return jsonify(chosen_tasks), 200
 
 #id on see nr enne kõiki teisi asju, sama väärtusega, mis value
 @app.route("/voting/tasks/addvote/<id>", methods=["POST"])
 def add_task_vote(id):
-    tasks["tasks"][0][id]["votes"] += 1
+    tasks["tasks"+str(last_used_taskset+1)][0][id]["votes"] += 1
     update_tasks_file()
-    return str(tasks["tasks"][0][id]["votes"]), 200
+    return str(tasks["tasks"+str(last_used_taskset+1)][0][id]["votes"]), 200
 #remove pole vaja vist?
 
-@app.route("/voting/end", methods=["GET"])
+@app.route("/voting/end", methods=["POST"])
 def end_voting():
-    global last_used_taskset
-    #send_tasks()
-    last_used_taskset += 1
-    #send_tasks() again
-    #saa vastavad tulemused, suurenda last_used, saa uued taskid
+    global last_used_taskset, winner_task
+    print("key: " + str(last_used_taskset+1))
+    current_taskset = tasks["tasks" + str(last_used_taskset+1)][0]
+    max_votes = 0
+    max_votes_key = None
+
+    for key in current_taskset.keys():
+        if current_taskset[key]["votes"] > max_votes:
+            max_votes_key = key
+
+    winner_task = current_taskset[max_votes_key]["text"]
+    print(winner_task)
+    update_last_used()
+
+    return winner_task, 200
+
+@app.route("/voting/winner_task", methods=["GET"])
+def get_winner_task():
+    global winner_task
+    return winner_task, 200
 
 #TODO: mängijate hääletus, hääletuse tulemused,
-#TODO: ühest seadmest ühe hääle lubamine, hääletuse start
+#TODO: ühest seadmest ühe hääle lubamine, hääletuse start, taimer miinusesse
 
 #server käima, esimene hääletus tasks1. Lõpp, järgmine tasks2
 

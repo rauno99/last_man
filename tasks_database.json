@@ -4,7 +4,7 @@
       "1": {
         "value": 1,
         "text": "s\u00f5lme tegemine",
-        "votes": 8,
+        "votes": 9,
         "include": 1
       },
       "2": {
@@ -25,19 +25,17 @@
     {
       "4": {
         "value": 4,
-        "text": "teksti dešifreerimine",
+        "text": "teksti de\u0161ifreerimine",
         "votes": 7,
         "include": 1
       },
       "5": {
         "value": 5,
-        "text": "mõistatuste lahendamine",
+        "text": "m\u00f5istatuste lahendamine",
         "votes": 7,
         "include": 1
       }
-
     }
   ],
-
-  "last_used": 1
+  "last_used": 2
 }

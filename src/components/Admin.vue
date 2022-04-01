@@ -103,7 +103,7 @@
                 ],
                 showResults: true,
             },
-            mostPopularTask: ""
+                mostPopularTask: ""
             }
         },
         methods: {
