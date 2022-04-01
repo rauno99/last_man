@@ -42,7 +42,6 @@
                     <h1 class="timeTitle" v-else>"Hääletatud!"</h1>
                 </b-col>
             </b-row>
-
         </b-container>
     </div>
 </template>
@@ -66,10 +65,6 @@ export default {
             pollOptions: {
                 question: "Järgmine ülesanne",
                 answers: [
-                    { value: 1, text: 'yl1', votes: 0 },
-                    { value: 2, text: 'yl2', votes: 0 },
-                    { value: 3, text: 'yl3', votes: 0 },
-                    { value: 4, text: 'yl4', votes: 0 } 
                 ]
             },
             showPoll: true

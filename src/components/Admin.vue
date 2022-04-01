@@ -18,7 +18,7 @@
                     <b-button class="m-1" @click="stopStopper">Stop</b-button>
                 </b-col>
                 <b-col>
-                    <input v-model="timerDuration" placeholder="Minutes">
+                    <input v-model="timerDuration" placeholder="Minutid">
                     <b-button class="m-1" @click="startTimer">Start</b-button>
                     <b-button class="m-1" @click="resumeTimer">Resume</b-button>
                     <b-button class="m-1" @click="stopTimer">Stop</b-button>
@@ -27,8 +27,8 @@
             <hr>
             <b-row>
                 <b-col>
-                <input v-model="playerName" placeholder="Name">
-                <b-button class="m-3" @click="addPlayer">Add player</b-button>
+                <input v-model="playerName" placeholder="Nimi">
+                <b-button class="m-3" @click="addPlayer">Lisa mängija</b-button>
                 </b-col>
             </b-row>
             <b-row>
@@ -52,12 +52,15 @@
                 </table>
                 </b-col>
             </b-row>
+            <hr>
+            <b-row>
+                <b-col>
+                    <h1 class="timeTitle">Eelmise hääletuse võitja: {{mostPopularTask}}</h1>
+                </b-col>
+            </b-row>
             <b-row>
                 <b-col>
                     <vue-poll v-bind="pollOptions" />
-                </b-col>
-                <b-col>
-                    <h1 class="timeTitle">Eelmise hääletuse võitja {{mostPopularTask}}</h1>
                 </b-col>
             </b-row>
             <b-row>
@@ -94,10 +97,6 @@
                 pollOptions: {
                 question: "Järgmine ülesanne",
                 answers: [
-                    { value: 1, text: 'yl1', votes: 0 },
-                    { value: 2, text: 'yl2', votes: 0 },
-                    { value: 3, text: 'yl3', votes: 0 },
-                    { value: 4, text: 'yl4', votes: 0 } 
                 ],
                 showResults: true,
             },
@@ -123,9 +122,9 @@
             axios.post("http://" + this.ip + ":5000/stopper/stop");
         },
         startTimer: function () {
-            this.timerDuration = this.timerDuration * 60
+            let timerMinutes = this.timerDuration * 60
             axios.post("http://" + this.ip + ":5000/timer/start", {
-                "duration": this.timerDuration
+                "duration": timerMinutes
             }).then((response) => {
                 this.timerDuration = ''
                 console.log(response)
