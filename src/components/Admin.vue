@@ -58,6 +58,14 @@
                 <b-col>
                     <vue-poll v-bind="pollOptions" />
                 </b-col>
+                <b-col>
+                    <h1>Eelmise hääletuse võitja {{mostPopularTask}}</h1>
+                </b-col>
+            </b-row>
+            <b-row>
+                <b-col>
+                    <b-button @click="endTasksPoll">Lõpeta hääletus</b-button>
+                </b-col>
             </b-row>
         </b-container>
 
@@ -93,7 +101,8 @@
                     { value: 3, text: 'yl3', votes: 0 },
                     { value: 4, text: 'yl4', votes: 0 } 
                 ],
-                showResults: true
+                showResults: true,
+                mostPopularTask: ""
             },
             }
         },
@@ -178,6 +187,13 @@
                     this.pollOptions.answers = res.data
                 });
         },
+        endTasksPoll: function() {
+            axios.post("http://" + this.ip + ":5000/voting/end")
+            .then((response) => {
+                this.mostPopularTask = response.data
+            });
+            this.getTasks();    
+        }
     },
 
     mounted() {
