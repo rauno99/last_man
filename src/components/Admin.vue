@@ -4,13 +4,11 @@
             <b-row class=text-center>
                 <b-col>
                     <h2 class="timeTitle">Seistud aeg</h2>
-                    <h1 class="time" v-if="stopper.stopwatch==='NaN:NaN:NaN'">00:00:00</h1>
-                    <h1 class="time" v-else>{{ stopper.stopwatch }}</h1>
+                    <h1 class="time">{{ stopper.stopwatch }}</h1>
                 </b-col>
                 <b-col>
                     <h2 class="timeTitle">Järgmise ülesandeni</h2>
-                    <h1 class="time" v-if="timer.timer==='NaN:NaN:NaN'">00:00:00</h1>
-                    <h1 v-else class="time">{{ timer.timer }}</h1>
+                    <h1 class="time">{{ timer.timer }}</h1>
                 </b-col>
             </b-row>
             <b-row class=text-center>
