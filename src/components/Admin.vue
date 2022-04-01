@@ -102,8 +102,8 @@
                     { value: 4, text: 'yl4', votes: 0 } 
                 ],
                 showResults: true,
-                mostPopularTask: ""
             },
+            mostPopularTask: ""
             }
         },
         methods: {
@@ -185,6 +185,11 @@
                 .get("http://" + this.ip + ":5000/voting/tasks")
                 .then((res) => {
                     this.pollOptions.answers = res.data
+                });
+            axios
+                .get("http://" + this.ip + ":5000/voting/winner_task")
+                .then((res) => {
+                    this.mostPopularTask = res.data
                 });
         },
         endTasksPoll: function() {
