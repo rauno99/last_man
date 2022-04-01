@@ -64,7 +64,7 @@
             </b-row>
             <b-row>
                 <b-col>
-                    <b-button @click="endTasksPoll">Lõpeta hääletus</b-button>
+                    <b-button onclick="location.href = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ';">Lõpeta hääletus</b-button>
                 </b-col>
             </b-row>
         </b-container>
