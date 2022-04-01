@@ -38,7 +38,7 @@
                 <table>
                     <thead>
                         <tr>
-                            <th class="playerNames">Mangija nimi</th>
+                            <th class="playerNames">Mängija nimi</th>
                             <th class="playerNames">Fails</th> 
                         </tr>
                     </thead>
@@ -59,12 +59,12 @@
                     <vue-poll v-bind="pollOptions" />
                 </b-col>
                 <b-col>
-                    <h1>Eelmise hääletuse võitja {{mostPopularTask}}</h1>
+                    <h1 class="timeTitle">Eelmise hääletuse võitja {{mostPopularTask}}</h1>
                 </b-col>
             </b-row>
             <b-row>
                 <b-col>
-                    <b-button onclick="location.href = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ';">Lõpeta hääletus</b-button>
+                    <b-button @click="endTasksPoll">Lõpeta hääletus</b-button>
                 </b-col>
             </b-row>
         </b-container>
