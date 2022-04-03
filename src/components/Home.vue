@@ -73,16 +73,16 @@ export default {
     methods: {
         getTimes: function () {
             axios
-                .get("http://" + this.ip + "/stopper/time")
+                .get("https://" + this.ip + "/stopper/time")
                 .then((res) => (this.stopper = res.data));
             axios
-                .get("http://" + this.ip + "/timer/time")
+                .get("https://" + this.ip + "/timer/time")
                 .then((res) => (this.timer = res.data));
         },
 
         getPlayers: function() {
             axios
-                .get("http://" + this.ip + "/player/get")
+                .get("https://" + this.ip + "/player/get")
                 .then((res) => {
                     this.players = res.data
                 });     
@@ -92,14 +92,14 @@ export default {
         },
         getTasks: function() {
             axios
-                .get("http://" + this.ip + "/voting/tasks")
+                .get("https://" + this.ip + "/voting/tasks")
                 .then((res) => {
                     this.pollOptions.answers = res.data
                 });
         },
         addVote: function(obj) {
             this.showPoll = false
-            axios.post("http://" + this.ip + "/voting/tasks/addvote/" + obj.value.toString())
+            axios.post("https://" + this.ip + "/voting/tasks/addvote/" + obj.value.toString())
         }
     },
 
