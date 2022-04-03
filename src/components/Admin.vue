@@ -123,7 +123,7 @@
         },
         startTimer: function () {
             let timerMinutes = this.timerDuration * 60
-            axios.post("http://" + this.ip + "/timer/start", {
+            axios.post("https://" + this.ip + "/timer/start", {
                 "duration": timerMinutes
             }).then((response) => {
                 this.timerDuration = ''
