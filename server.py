@@ -215,10 +215,6 @@ def reset_timer():
     timer_value = 0
     return "timer reset", 200
 
-@app.route("/timer/resume", methods=["POST"])
-def resume_timer():
-    pass
-
 @app.route("/player/get", methods=["GET"])
 def get_players():
     return jsonify(list(players["players"][0].values())), 200
@@ -228,14 +224,14 @@ def get_players():
 def add_fail(value):
     players["players"][0][str(value)]["fails"] += 1
     update_players_file()
-    return jsonify(players), 200
+    return jsonify(list(players["players"][0].values())), 200
 
 @app.route("/fail/remove/<value>", methods=["POST"])
 def remove_fail(value):
     if players["players"][0][str(value)]["fails"] > 0:
         players["players"][0][str(value)]["fails"] -= 1
         update_players_file()
-    return jsonify(players), 200
+    return jsonify(list(players["players"][0].values())), 200
 
 @app.route("/voting/players/resetvotes", methods=["POST"])
 def reset_playervotes():
@@ -263,7 +259,7 @@ def add_player():
 def remove_player(value):
     players["players"][0].pop(value)
     update_players_file()
-    return jsonify(players), 200
+    return jsonify(list(players["players"][0].values())), 200
 
 @app.route("/voting/tasks", methods=["GET"])
 def send_tasks():
@@ -305,7 +301,7 @@ def get_winner_task():
 
 #TODO: mängijate hääletus, hääletuse tulemused,
 #TODO: ühest seadmest ühe hääle lubamine, hääletuse start, taimer miinusesse
-app.route("/voting/players/addvote/<name>", methods=["POST"])
+app.route("/voting/players/addvote/<value>", methods=["POST"])
 def add_player_vote():
     pass
 
