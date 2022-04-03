@@ -3,6 +3,7 @@
 #MVP-d:
 #Markus, Markus, Samsungi monitor, huge ass chonky Samsungi monitor, Robert
 from math import floor
+import ssl
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from threading import Thread
@@ -12,20 +13,20 @@ import json
 app = Flask(__name__, static_folder="dist/", static_url_path="/")
 CORS(app)
 
-stopwatch_thread = None
-timer_thread = None
+# stopwatch_thread = None
+# timer_thread = None
 
-stopwatch_stop_flag = False
-timer_stop_flag = False
+# stopwatch_stop_flag = False
+# timer_stop_flag = False
 
-stopwatch_value = 0
-timer_value = 0
+# stopwatch_value = 0
+# timer_value = 0
 
-players = {}
-tasks = {}
-last_used_taskset = 0
+# players = {}
+# tasks = {}
+# last_used_taskset = 0
 
-winner_task = ""
+# winner_task = ""
 
 def make_tasks(subset_size, input):
     names = input.split(", ")
@@ -303,6 +304,22 @@ def get_winner_task():
 
 @app.before_first_request
 def execute_before():
+    global stopwatch_thread, timer_thread, stopwatch_stop_flag, timer_stop_flag, stopwatch_value, timer_value, players, tasks, last_used_taskset, winner_task
+    stopwatch_thread = None
+    timer_thread = None
+
+    stopwatch_stop_flag = False
+    timer_stop_flag = False
+
+    stopwatch_value = 0
+    timer_value = 0
+
+    players = {}
+    tasks = {}
+    last_used_taskset = 0
+
+    winner_task = ""
+
     read_players()
     read_tasks()
 
@@ -317,9 +334,6 @@ def add_player_vote():
 
 if __name__ == "__main__":
     #see on täitsa oiž
-    #print(tasks["tasks"][0]["1"]["votes"])
-    #print(list(tasks["tasks"][0].values())[:2])
-    read_players()
     app.run(host="0.0.0.0", port=5000, debug=False)
     #read_tasks()
     #make_tasks(4,"Sõlme tegemine väikse krutskiga, peast arvutamine, ühel jalal seismine, teksti dešifreerimine, mõistatuse lahendamine, märki viskamine, vee tassimine ühest anumast teise, silmad kinni seismine, muna hoidmine lusika peal, fraasi kordamine, tagurpidi tähestiku lugemine, numbrite lugemine, nööriga pastakas pudelisse, jäätunud särgi lahti harutamine, torni ehitamine")
