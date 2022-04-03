@@ -2,6 +2,7 @@
 
 #MVP-d:
 #Markus, Markus, Samsungi monitor, huge ass chonky Samsungi monitor, Robert
+from crypt import methods
 from math import floor
 from flask import Flask, jsonify, request
 from flask_cors import CORS
@@ -9,7 +10,7 @@ from threading import Thread
 import time
 import json
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder="dist/", static_url_path="/")
 CORS(app)
 
 stopwatch_thread = None
@@ -109,6 +110,10 @@ def update_last_used():
     last_used_taskset += 1
     tasks["last_used"] += 1
     update_tasks_file()
+
+@app.route("/", methods=["GET"])
+def index():
+    return app.send_static_file("index.html")
 
 @app.route("/stopper/time", methods=["GET"])
 def get_stopper_time():
