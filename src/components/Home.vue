@@ -29,7 +29,7 @@
                     </thead>
                     <tbody>
                         <tr v-for="(value, key) in players" :key="key">
-                            <td class="playerNames">{{key}}</td>
+                            <td class="playerNames">{{value.text}}</td>
                             <td class="playerX">{{calcX(value)}}</td>
                         </tr>
                     </tbody>
@@ -73,32 +73,33 @@ export default {
     methods: {
         getTimes: function () {
             axios
-                .get("http://" + this.ip + ":5000/stopper/time")
+                .get("http://" + this.ip + "/stopper/time")
                 .then((res) => (this.stopper = res.data));
             axios
-                .get("http://" + this.ip + ":5000/timer/time")
+                .get("http://" + this.ip + "/timer/time")
                 .then((res) => (this.timer = res.data));
         },
 
         getPlayers: function() {
             axios
-                .get("http://" + this.ip + ":5000/player/get")
-                .then((res) => (this.players = res.data));     
+                .get("http://" + this.ip + "/player/get")
+                .then((res) => {
+                    this.players = res.data
+                });     
         },
         calcX: function(n) {
             return "X".repeat(n)
         },
         getTasks: function() {
             axios
-                .get("http://" + this.ip + ":5000/voting/tasks")
+                .get("http://" + this.ip + "/voting/tasks")
                 .then((res) => {
-                    console.log(res)
                     this.pollOptions.answers = res.data
                 });
         },
         addVote: function(obj) {
             this.showPoll = false
-            axios.post("http://" + this.ip + ":5000/voting/tasks/addvote/" + obj.value.toString())
+            axios.post("http://" + this.ip + "/voting/tasks/addvote/" + obj.value.toString())
         }
     },
 
