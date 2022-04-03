@@ -51,7 +51,7 @@ def make_tasks(subset_size, input):
 
     outer_dict["last_used"] = 0
 
-    with open("tasks_test.json", "w", encoding="utf8") as tasks_file:
+    with open("tasks_database.json", "w", encoding="utf8") as tasks_file:
         json.dump(outer_dict, tasks_file)
 
 def time_convert(sec):
@@ -226,14 +226,14 @@ def get_players():
 @app.route("/fail/add/<value>", methods=["POST"])
 #nüüd tuleb value saata
 def add_fail(value):
-    players["players"][0][str(value)]["votes"] += 1
+    players["players"][0][str(value)]["fails"] += 1
     update_players_file()
     return jsonify(players), 200
 
 @app.route("/fail/remove/<value>", methods=["POST"])
 def remove_fail(value):
-    if players["players"][0][str(value)]["votes"] > 0:
-        players["players"][0][str(value)]["votes"] -= 1
+    if players["players"][0][str(value)]["fails"] > 0:
+        players["players"][0][str(value)]["fails"] -= 1
         update_players_file()
     return jsonify(players), 200
 
@@ -252,6 +252,7 @@ def add_player():
     player_object["value"] = len(players["players"][0]) + 1
     player_object["text"] = data["name"]
     player_object["votes"] = 0
+    player_object["fails"] = 0
     key = str(player_object["value"])
     players["players"][0][key] = player_object
     update_players_file()
@@ -302,6 +303,12 @@ def get_winner_task():
     global winner_task
     return winner_task, 200
 
+#TODO: mängijate hääletus, hääletuse tulemused,
+#TODO: ühest seadmest ühe hääle lubamine, hääletuse start, taimer miinusesse
+app.route("/voting/players/addvote/<name>", methods=["POST"])
+def add_player_vote():
+    pass
+
 @app.before_first_request
 def execute_before():
     global stopwatch_thread, timer_thread, stopwatch_stop_flag, timer_stop_flag, stopwatch_value, timer_value, players, tasks, last_used_taskset, winner_task
@@ -323,18 +330,8 @@ def execute_before():
     read_players()
     read_tasks()
 
-
-#TODO: mängijate hääletus, hääletuse tulemused,
-#TODO: ühest seadmest ühe hääle lubamine, hääletuse start, taimer miinusesse
-app.route("/voting/players/addvote/<name>", methods=["POST"])
-def add_player_vote():
-    pass
-
 #TODO: mängijate hääletus, stopperi value faili, ülesanded faili
 
 if __name__ == "__main__":
-    #see on täitsa oiž
     app.run(host="0.0.0.0", port=5000, debug=False)
-    #read_tasks()
-    #make_tasks(4,"Sõlme tegemine väikse krutskiga, peast arvutamine, ühel jalal seismine, teksti dešifreerimine, mõistatuse lahendamine, märki viskamine, vee tassimine ühest anumast teise, silmad kinni seismine, muna hoidmine lusika peal, fraasi kordamine, tagurpidi tähestiku lugemine, numbrite lugemine, nööriga pastakas pudelisse, jäätunud särgi lahti harutamine, torni ehitamine")
 

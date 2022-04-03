@@ -4,12 +4,14 @@
       "0": {
         "value": 0,
         "text": "Antsssss",
-        "votes": 0
+        "votes": 0,
+        "fails": 0
       },
       "1": {
         "value": 1,
         "text": "Robert",
-        "votes": 0
+        "votes": 0,
+        "fails": 0
       }
     }
   ]
