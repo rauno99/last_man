@@ -12,21 +12,34 @@ import json
 
 app = Flask(__name__, static_folder="dist/", static_url_path="/")
 CORS(app)
+stopwatch_thread = None
+timer_thread = None
 
-# stopwatch_thread = None
-# timer_thread = None
+stopwatch_stop_flag = False
+timer_stop_flag = False
 
-# stopwatch_stop_flag = False
-# timer_stop_flag = False
+stopwatch_value = 0
+timer_value = 0
 
-# stopwatch_value = 0
-# timer_value = 0
+players = {}
+tasks = {}
+last_used_taskset = 0
 
-# players = {}
-# tasks = {}
-# last_used_taskset = 0
+winner_task = ""
 
-# winner_task = ""
+def read_tasks():
+    global tasks, last_used_taskset
+    with open("tasks_database.json", encoding="utf8") as tasks_database:
+        tasks = json.load(tasks_database)
+    last_used_taskset = tasks["last_used"]
+
+def read_players():
+    global players
+    with open("players_database.json", encoding="utf8") as players_database:
+        players = json.load(players_database)
+
+read_players()
+read_tasks()
 
 def make_tasks(subset_size, input):
     names = input.split(", ")
@@ -70,14 +83,19 @@ def time_convert(sec):
 
     return str(hours) + ":" + str(mins) + ":" + str(sec)
 
-def stopwatch():
+def stopwatch(start_value):
+    if start_value != 0:
+        array = start_value.split(":")
+        seconds = int(array[0]) * 3600 + int(array[1]) * 60 + int(array[2])
+    else:
+        seconds = 0
     global stopwatch_value
     start = time.time()
 
     while True:
         if stopwatch_stop_flag:
             break
-        stopwatch_value = time.time() - start
+        stopwatch_value = time.time() - start + seconds
 
 def update_times_file():
 
@@ -95,22 +113,10 @@ def timer(duration):
             break
         timer_value = duration - (time.time() - start)
 
-
-def read_players():
-    global players
-    with open("players_database.json", encoding="utf8") as players_database:
-        players = json.load(players_database)
-
 def update_players_file():
     global players
     with open("players_database.json", "w", encoding="utf8") as players_database:
         json.dump(players, players_database)
-
-def read_tasks():
-    global tasks, last_used_taskset
-    with open("tasks_database.json", encoding="utf8") as tasks_database:
-        tasks = json.load(tasks_database)
-    last_used_taskset = tasks["last_used"]
 
 def choose_tasks():
     global tasks
@@ -156,9 +162,10 @@ def get_stopper_time():
 def start_stopper():
     global stopwatch_thread, stopwatch_stop_flag
     if stopwatch_thread != None and not stopwatch_thread.is_alive() or stopwatch_thread == None:
-
+        data = request.json
+        start_value = data["duration"]
         stopwatch_stop_flag = False
-        stopwatch_thread = Thread(target=stopwatch)
+        stopwatch_thread = Thread(target=stopwatch, args=(start_value,))
         stopwatch_thread.start()
         return "Stopper käib", 200
     return "Stopper juba käib", 200
@@ -220,7 +227,6 @@ def get_players():
     return jsonify(list(players["players"][0].values())), 200
 
 @app.route("/fail/add/<value>", methods=["POST"])
-#nüüd tuleb value saata
 def add_fail(value):
     players["players"][0][str(value)]["fails"] += 1
     update_players_file()
@@ -252,10 +258,9 @@ def add_player():
     key = str(player_object["value"])
     players["players"][0][key] = player_object
     update_players_file()
-    return jsonify(players), 200
+    return jsonify(list(players["players"][0].values())), 200
 
 @app.route("/player/remove/<value>", methods=["POST"])
-#kas value tuleb int või str?
 def remove_player(value):
     players["players"][0].pop(value)
     update_players_file()
@@ -268,13 +273,11 @@ def send_tasks():
     print(chosen_tasks)
     return jsonify(chosen_tasks), 200
 
-#id on see nr enne kõiki teisi asju, sama väärtusega, mis value
 @app.route("/voting/tasks/addvote/<id>", methods=["POST"])
 def add_task_vote(id):
     tasks["tasks"+str(last_used_taskset+1)][0][id]["votes"] += 1
     update_tasks_file()
     return str(tasks["tasks"+str(last_used_taskset+1)][0][id]["votes"]), 200
-#remove pole vaja vist?
 
 @app.route("/voting/end", methods=["POST"])
 def end_voting():
@@ -299,35 +302,15 @@ def get_winner_task():
     global winner_task
     return winner_task, 200
 
-#TODO: mängijate hääletus, hääletuse tulemused,
-#TODO: ühest seadmest ühe hääle lubamine, hääletuse start, taimer miinusesse
+#TODO: mängijate hääletus, hääletuse tulemused, stopper faili, hääletuse start
+
 app.route("/voting/players/addvote/<value>", methods=["POST"])
-def add_player_vote():
-    pass
-
-@app.before_first_request
-def execute_before():
-    global stopwatch_thread, timer_thread, stopwatch_stop_flag, timer_stop_flag, stopwatch_value, timer_value, players, tasks, last_used_taskset, winner_task
-    stopwatch_thread = None
-    timer_thread = None
-
-    stopwatch_stop_flag = False
-    timer_stop_flag = False
-
-    stopwatch_value = 0
-    timer_value = 0
-
-    players = {}
-    tasks = {}
-    last_used_taskset = 0
-
-    winner_task = ""
-
-    read_players()
-    read_tasks()
-
-#TODO: mängijate hääletus, stopperi value faili, ülesanded faili
+def add_player_vote(value):
+    players["players"][0][str(value)]["votes"] += 1
+    update_players_file()
+    return jsonify(list(players["players"][0].values())), 200
 
 if __name__ == "__main__":
+
     app.run(host="0.0.0.0", port=5000, debug=False)
 
