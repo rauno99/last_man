@@ -13,6 +13,7 @@
             </b-row>
             <b-row class=text-center>
                 <b-col>
+                    <input v-model="stopperDuration" placeholder="00:00:00">
                     <b-button class="m-1" @click="startStopper">Start</b-button>
                     <b-button class="m-1" @click="resetStopper">Reset</b-button>
                     <b-button class="m-1" @click="stopStopper">Stop</b-button>
@@ -89,6 +90,7 @@
                 timePollInterval: null,
                 playerName: '',
                 timerDuration: '',
+                stopperDuration: '',
                 ip: window.location.hostname,
                 protocol: "https://",
                 players: {},
@@ -114,7 +116,14 @@
                 .then((res) => (this.timer = res.data));
         },
         startStopper: function () {
-            axios.post(this.protocol + this.ip + "/stopper/start").then((response) => {console.log(response)});
+            let sendData = ''
+            if (this.stopperDuration === '') {
+                sendData = 0
+            }
+            else {
+                sendData = this.stopperDuration
+            }
+            axios.post(this.protocol + this.ip + "/stopper/start", {"duration": sendData}).then((response) => {console.log(response)});
         },
         resetStopper: function () {
             axios.post(this.protocol + this.ip + "/stopper/reset");
