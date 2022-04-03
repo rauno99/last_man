@@ -1,1 +1,16 @@
-{"Robert": 1, "Antsssss": 4}
+{
+  "players": [
+    {
+      "0": {
+        "value": 0,
+        "text": "Antsssss",
+        "votes": 0
+      },
+      "1": {
+        "value": 1,
+        "text": "Robert",
+        "votes": 0
+      }
+    }
+  ]
+}

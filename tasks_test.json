@@ -1,0 +1,94 @@
+{
+  "tasks1": [
+    {
+      "0": {
+        "value": 0,
+        "text": "S\u00f5lme tegemine v\u00e4ikse krutskiga",
+        "votes": 0
+      },
+      "1": {
+        "value": 1,
+        "text": "peast arvutamine",
+        "votes": 0
+      },
+      "2": {
+        "value": 2,
+        "text": "\u00fchel jalal seismine",
+        "votes": 0
+      },
+      "3": {
+        "value": 3,
+        "text": "teksti de\u0161ifreerimine",
+        "votes": 0
+      }
+    }
+  ],
+  "tasks2": [
+    {
+      "4": {
+        "value": 4,
+        "text": "m\u00f5istatuse lahendamine",
+        "votes": 0
+      },
+      "5": {
+        "value": 5,
+        "text": "m\u00e4rki viskamine",
+        "votes": 0
+      },
+      "6": {
+        "value": 6,
+        "text": "vee tassimine \u00fchest anumast teise",
+        "votes": 0
+      },
+      "7": {
+        "value": 7,
+        "text": "silmad kinni seismine",
+        "votes": 0
+      }
+    }
+  ],
+  "tasks3": [
+    {
+      "8": {
+        "value": 8,
+        "text": "muna hoidmine lusika peal",
+        "votes": 0
+      },
+      "9": {
+        "value": 9,
+        "text": "fraasi kordamine",
+        "votes": 0
+      },
+      "10": {
+        "value": 10,
+        "text": "tagurpidi t\u00e4hestiku lugemine",
+        "votes": 0
+      },
+      "11": {
+        "value": 11,
+        "text": "numbrite lugemine",
+        "votes": 0
+      }
+    }
+  ],
+  "tasks4": [
+    {
+      "12": {
+        "value": 12,
+        "text": "n\u00f6\u00f6riga pastakas pudelisse",
+        "votes": 0
+      },
+      "13": {
+        "value": 13,
+        "text": "j\u00e4\u00e4tunud s\u00e4rgi lahti harutamine",
+        "votes": 0
+      },
+      "14": {
+        "value": 14,
+        "text": "torni ehitamine",
+        "votes": 0
+      }
+    }
+  ],
+  "last_used": 0
+}

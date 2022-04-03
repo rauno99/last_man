@@ -2,7 +2,6 @@
 
 #MVP-d:
 #Markus, Markus, Samsungi monitor, huge ass chonky Samsungi monitor, Robert
-from crypt import methods
 from math import floor
 from flask import Flask, jsonify, request
 from flask_cors import CORS
@@ -28,6 +27,32 @@ last_used_taskset = 0
 
 winner_task = ""
 
+def make_tasks(subset_size, input):
+    names = input.split(", ")
+    outer_dict = {}
+    dict = {}
+    taskset_no = 1
+    for i in range(len(names)):
+        text = names[i]
+        task_object = {}
+        task_object["value"] = i
+        task_object["text"] = text
+        task_object["votes"] = 0
+        dict[i] = task_object
+        if (i+1) % subset_size == 0 or i == len(names) - 1:
+
+            list = []
+            list.append(dict)
+            outer_key = "tasks" + str(taskset_no)
+            outer_dict[outer_key] = list
+            dict = {}
+            taskset_no += 1
+
+    outer_dict["last_used"] = 0
+
+    with open("tasks_test.json", "w", encoding="utf8") as tasks_file:
+        json.dump(outer_dict, tasks_file)
+
 def time_convert(sec):
     sec = floor(sec)
     mins = sec // 60
@@ -52,6 +77,12 @@ def stopwatch():
         if stopwatch_stop_flag:
             break
         stopwatch_value = time.time() - start
+
+def update_times_file():
+
+    with open("times_database.json", "w") as times_file:
+        json.dump({"stopwatch": stopwatch_value}, times_file)
+        #no mdea mees
 
 def timer(duration):
     global timer_value
@@ -189,34 +220,46 @@ def resume_timer():
 
 @app.route("/player/get", methods=["GET"])
 def get_players():
-    return jsonify(players), 200
+    return jsonify(list(players["players"][0].values())), 200
 
-@app.route("/fail/add/<name>", methods=["POST"])
-def add_fail(name):
-    players[name] += 1
+@app.route("/fail/add/<value>", methods=["POST"])
+#nüüd tuleb value saata
+def add_fail(value):
+    players["players"][0][str(value)]["votes"] += 1
     update_players_file()
     return jsonify(players), 200
 
-@app.route("/fail/remove/<name>", methods=["POST"])
-def remove_fail(name):
-    if players[name] <= 0:
-        players[name] = 0
-    else:
-        players[name] -= 1
-    update_players_file()
+@app.route("/fail/remove/<value>", methods=["POST"])
+def remove_fail(value):
+    if players["players"][0][str(value)]["votes"] > 0:
+        players["players"][0][str(value)]["votes"] -= 1
+        update_players_file()
     return jsonify(players), 200
+
+@app.route("/voting/players/resetvotes", methods=["POST"])
+def reset_playervotes():
+    for i in range(len(players["players"][0])):
+        players["players"][0][str(i)]["votes"] = 0
+    update_players_file()
+    return "Votes cleared", 200
 
 @app.route("/player/add", methods=["POST"])
 def add_player():
     data = request.json
     print(data)
-    players[data["name"]] = 0
+    player_object = {}
+    player_object["value"] = len(players["players"][0]) + 1
+    player_object["text"] = data["name"]
+    player_object["votes"] = 0
+    key = str(player_object["value"])
+    players["players"][0][key] = player_object
     update_players_file()
     return jsonify(players), 200
 
-@app.route("/player/remove/<name>", methods=["POST"])
-def remove_player(name):
-    players.pop(name)
+@app.route("/player/remove/<value>", methods=["POST"])
+#kas value tuleb int või str?
+def remove_player(value):
+    players["players"][0].pop(value)
     update_players_file()
     return jsonify(players), 200
 
@@ -266,12 +309,18 @@ def execute_before():
 
 #TODO: mängijate hääletus, hääletuse tulemused,
 #TODO: ühest seadmest ühe hääle lubamine, hääletuse start, taimer miinusesse
+app.route("/voting/players/addvote/<name>", methods=["POST"])
+def add_player_vote():
+    pass
 
-#server käima, esimene hääletus tasks1. Lõpp, järgmine tasks2
+#TODO: mängijate hääletus, stopperi value faili, ülesanded faili
 
 if __name__ == "__main__":
     #see on täitsa oiž
     #print(tasks["tasks"][0]["1"]["votes"])
     #print(list(tasks["tasks"][0].values())[:2])
+    read_players()
     app.run(host="0.0.0.0", port=5000, debug=False)
+    #read_tasks()
+    #make_tasks(4,"Sõlme tegemine väikse krutskiga, peast arvutamine, ühel jalal seismine, teksti dešifreerimine, mõistatuse lahendamine, märki viskamine, vee tassimine ühest anumast teise, silmad kinni seismine, muna hoidmine lusika peal, fraasi kordamine, tagurpidi tähestiku lugemine, numbrite lugemine, nööriga pastakas pudelisse, jäätunud särgi lahti harutamine, torni ehitamine")
 
