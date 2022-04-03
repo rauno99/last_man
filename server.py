@@ -253,19 +253,20 @@ def get_winner_task():
     global winner_task
     return winner_task, 200
 
+@app.before_first_request
+def execute_before():
+    read_players()
+    read_tasks()
+
+
 #TODO: mängijate hääletus, hääletuse tulemused,
 #TODO: ühest seadmest ühe hääle lubamine, hääletuse start, taimer miinusesse
 
 #server käima, esimene hääletus tasks1. Lõpp, järgmine tasks2
 
 if __name__ == "__main__":
-    read_players()
-    read_tasks()
-
     #see on täitsa oiž
     #print(tasks["tasks"][0]["1"]["votes"])
     #print(list(tasks["tasks"][0].values())[:2])
-
-
     app.run(host="0.0.0.0", port=5000, debug=False)
 
