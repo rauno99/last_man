@@ -43,10 +43,10 @@
                     <tbody>
                         <tr v-for="(value, key) in players" :key="key">
                             <td class="playerNames">{{value.text}}</td>
-                            <td class="playerX">{{calcX(value)}}</td>
-                            <td><b-button @click="addFail(value.text)">+</b-button></td>
-                            <td><b-button @click="removeFail(value.text)">-</b-button></td>
-                            <td><b-button @click="removePlayer(value.text)">Remove</b-button></td>
+                            <td class="playerX">{{calcX(value.fails)}}</td>
+                            <td><b-button @click="addFail(value.value)">+</b-button></td>
+                            <td><b-button @click="removeFail(value.value)">-</b-button></td>
+                            <td><b-button @click="removePlayer(value.value)">Remove</b-button></td>
                         </tr>
                     </tbody>
                 </table>
@@ -90,6 +90,7 @@
                 playerName: '',
                 timerDuration: '',
                 ip: window.location.hostname,
+                protocol: "http://",
                 players: {},
                 stopperAlive: false,
                 timerAlive: false,
@@ -106,24 +107,24 @@
         methods: {
         getTimes: function () {
             axios
-                .get("https://" + this.ip + "/stopper/time")
+                .get(this.protocol + this.ip + "/stopper/time")
                 .then((res) => (this.stopper = res.data));
             axios
-                .get("https://" + this.ip + "/timer/time")
+                .get(this.protocol + this.ip + "/timer/time")
                 .then((res) => (this.timer = res.data));
         },
         startStopper: function () {
-            axios.post("https://" + this.ip + "/stopper/start").then((response) => {console.log(response)});
+            axios.post(this.protocol + this.ip + "/stopper/start").then((response) => {console.log(response)});
         },
         resetStopper: function () {
-            axios.post("https://" + this.ip + "/stopper/reset");
+            axios.post(this.protocol + this.ip + "/stopper/reset");
         },
         stopStopper: function () {
-            axios.post("https://" + this.ip + "/stopper/stop");
+            axios.post(this.protocol + this.ip + "/stopper/stop");
         },
         startTimer: function () {
             let timerMinutes = this.timerDuration * 60
-            axios.post("https://" + this.ip + "/timer/start", {
+            axios.post(this.protocol + this.ip + "/timer/start", {
                 "duration": timerMinutes
             }).then((response) => {
                 this.timerDuration = ''
@@ -131,22 +132,22 @@
             });
         },
         resumeTimer: function () {
-            axios.post("https://" + this.ip + "/timer/resume");
+            axios.post(this.protocol + this.ip + "/timer/resume");
         },
         resetTimer: function () {
-            axios.post("https://" + this.ip + "/timer/reset");
+            axios.post(this.protocol + this.ip + "/timer/reset");
         },
         stopTimer: function () {
-            axios.post("https://" + this.ip + "/timer/stop");
+            axios.post(this.protocol + this.ip + "/timer/stop");
         },
         getPlayers: function() {
             axios
-                .get("https://" + this.ip + "/player/get")
+                .get(this.protocol + this.ip + "/player/get")
                 .then((res) => (this.players = res.data));     
         },
         addPlayer: function() {
             if (this.playerName != '') {
-                axios.post("https://" + this.ip + "/player/add", {
+                axios.post(this.protocol + this.ip + "/player/add", {
                     "name": this.playerName
                 }).then((response) => {
                     this.playerName = ''
@@ -156,20 +157,20 @@
             }
         },
         removePlayer: function(name) {
-            axios.post("https://" + this.ip + "/player/remove/" + name)
+            axios.post(this.protocol + this.ip + "/player/remove/" + name)
             .then((response) => {
                 this.players = response.data
             });
         },
 
         addFail: function(name) {
-            axios.post("https://" + this.ip + "/fail/add/" + name)
+            axios.post(this.protocol + this.ip + "/fail/add/" + name)
             .then((response) => {
                 this.players = response.data
             });
         },
         removeFail: function(name) {
-            axios.post("https://" + this.ip + "/fail/remove/" + name)
+            axios.post(this.protocol + this.ip + "/fail/remove/" + name)
             .then((response) => {
                 this.players = response.data
             });      
@@ -179,18 +180,18 @@
         },
         getTasks: function() {
             axios
-                .get("https://" + this.ip + "/voting/tasks")
+                .get(this.protocol + this.ip + "/voting/tasks")
                 .then((res) => {
                     this.pollOptions.answers = res.data
                 });
             axios
-                .get("https://" + this.ip + "/voting/winner_task")
+                .get(this.protocol + this.ip + "/voting/winner_task")
                 .then((res) => {
                     this.mostPopularTask = res.data
                 });
         },
         endTasksPoll: function() {
-            axios.post("https://" + this.ip + "/voting/end")
+            axios.post(this.protocol + this.ip + "/voting/end")
             .then((response) => {
                 this.mostPopularTask = response.data
             });

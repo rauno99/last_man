@@ -30,7 +30,7 @@
                     <tbody>
                         <tr v-for="(value, key) in players" :key="key">
                             <td class="playerNames">{{value.text}}</td>
-                            <td class="playerX">{{calcX(value)}}</td>
+                            <td class="playerX">{{calcX(value.fails)}}</td>
                         </tr>
                     </tbody>
                 </table>
@@ -61,6 +61,7 @@ export default {
             stopper: "",
             timePollInterval: null,
             ip: window.location.hostname,
+            protocol: "http://",
             players: {},
             pollOptions: {
                 question: "Järgmine ülesanne",
@@ -73,16 +74,16 @@ export default {
     methods: {
         getTimes: function () {
             axios
-                .get("https://" + this.ip + "/stopper/time")
+                .get(this.protocol + this.ip + "/stopper/time")
                 .then((res) => (this.stopper = res.data));
             axios
-                .get("https://" + this.ip + "/timer/time")
+                .get(this.protocol + this.ip + "/timer/time")
                 .then((res) => (this.timer = res.data));
         },
 
         getPlayers: function() {
             axios
-                .get("https://" + this.ip + "/player/get")
+                .get(this.protocol + this.ip + "/player/get")
                 .then((res) => {
                     this.players = res.data
                 });     
@@ -92,14 +93,14 @@ export default {
         },
         getTasks: function() {
             axios
-                .get("https://" + this.ip + "/voting/tasks")
+                .get(this.protocol + this.ip + "/voting/tasks")
                 .then((res) => {
                     this.pollOptions.answers = res.data
                 });
         },
         addVote: function(obj) {
             this.showPoll = false
-            axios.post("https://" + this.ip + "/voting/tasks/addvote/" + obj.value.toString())
+            axios.post(this.protocol + this.ip + "/voting/tasks/addvote/" + obj.value.toString())
         }
     },
 
