@@ -90,7 +90,7 @@
                 playerName: '',
                 timerDuration: '',
                 ip: window.location.hostname,
-                protocol: "http://",
+                protocol: "https://",
                 players: {},
                 stopperAlive: false,
                 timerAlive: false,

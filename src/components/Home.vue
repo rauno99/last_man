@@ -61,7 +61,7 @@ export default {
             stopper: "",
             timePollInterval: null,
             ip: window.location.hostname,
-            protocol: "http://",
+            protocol: "https://",
             players: {},
             pollOptions: {
                 question: "Järgmine ülesanne",
