@@ -3,15 +3,37 @@
 #MVP-d:
 #Markus, Markus, Samsungi monitor, huge ass chonky Samsungi monitor, Robert
 from math import floor
-import ssl
 from flask import Flask, jsonify, request
+from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
 from flask_cors import CORS
 from threading import Thread
 import time
 import json
 
 app = Flask(__name__, static_folder="dist/", static_url_path="/")
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:1234@localhost:5432/last_man_db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 CORS(app)
+
+db = SQLAlchemy(app)
+migrate = Migrate(app, db)
+
+class Players(db.Model):
+    __tablename__ = "players"
+    value = db.Column('value', db.Integer(), primary_key = True)
+    name = db.Column('name', db.String(100))
+    fails = db.Column('fails', db.Integer())
+    votes = db.Column('votes', db.Integer())
+    include = db.Column('include', db.Boolean())
+
+class Tasks(db.Model):
+    __tablename__ = "tasks"
+    value = db.Column('value', db.Integer(), primary_key = True)
+    text = db.Column('text', db.String(300))
+    votes = db.Column('votes', db.Integer())
+    include = db.Column('include', db.Boolean())
+
 stopwatch_thread = None
 timer_thread = None
 
@@ -224,7 +246,18 @@ def reset_timer():
 
 @app.route("/player/get", methods=["GET"])
 def get_players():
-    return jsonify(list(players["players"][0].values())), 200
+    
+    players = Players.query.all()
+    results = [
+        {
+            "value": player.value,
+            "text": player.name,
+            "votes": player.votes,
+            "fails": player.fails
+
+        } for player in players]
+    
+    return jsonify(results), 200
 
 @app.route("/fail/add/<value>", methods=["POST"])
 def add_fail(value):
@@ -249,6 +282,24 @@ def reset_playervotes():
 @app.route("/player/add", methods=["POST"])
 def add_player():
     data = request.json
+    new_player = Players(name=data["name"], fails=0, votes=0, include=True)
+    db.session.add(new_player)
+    db.session.commit()
+    
+    players = Players.query.all()
+    results = [
+        {
+            "value": player.value,
+            "text": player.name,
+            "votes": player.votes,
+            "fails": player.fails
+
+        } for player in players]
+    
+    return jsonify(results), 200
+
+
+    """data = request.json
     print(data)
     player_object = {}
     player_object["value"] = len(players["players"][0]) + 1
@@ -258,7 +309,7 @@ def add_player():
     key = str(player_object["value"])
     players["players"][0][key] = player_object
     update_players_file()
-    return jsonify(list(players["players"][0].values())), 200
+    return jsonify(list(players["players"][0].values())), 200"""
 
 @app.route("/player/remove/<value>", methods=["POST"])
 def remove_player(value):
