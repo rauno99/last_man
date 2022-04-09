@@ -10,6 +10,7 @@ from flask_cors import CORS
 from threading import Thread
 import time
 import json
+import random
 
 app = Flask(__name__, static_folder="dist/", static_url_path="/")
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:1234@localhost:5432/last_man_db'
@@ -18,21 +19,6 @@ CORS(app)
 
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
-
-class Players(db.Model):
-    __tablename__ = "players"
-    value = db.Column('value', db.Integer(), primary_key = True)
-    name = db.Column('name', db.String(100))
-    fails = db.Column('fails', db.Integer())
-    votes = db.Column('votes', db.Integer())
-    include = db.Column('include', db.Boolean())
-
-class Tasks(db.Model):
-    __tablename__ = "tasks"
-    value = db.Column('value', db.Integer(), primary_key = True)
-    text = db.Column('text', db.String(300))
-    votes = db.Column('votes', db.Integer())
-    include = db.Column('include', db.Boolean())
 
 stopwatch_thread = None
 timer_thread = None
@@ -63,31 +49,30 @@ def read_players():
 read_players()
 read_tasks()
 
-def make_tasks(subset_size, input):
+class Players(db.Model):
+    __tablename__ = "players"
+    value = db.Column('value', db.Integer(), primary_key = True)
+    name = db.Column('name', db.String(100))
+    fails = db.Column('fails', db.Integer())
+    votes = db.Column('votes', db.Integer())
+    include = db.Column('include', db.Boolean())
+
+class Tasks(db.Model):
+    __tablename__ = "tasks"
+    value = db.Column('value', db.Integer(), primary_key = True)
+    text = db.Column('text', db.String(300))
+    votes = db.Column('votes', db.Integer())
+    include = db.Column('include', db.Boolean())
+
+#TODO: fix
+def make_tasks(input):
     names = input.split(", ")
-    outer_dict = {}
-    dict = {}
-    taskset_no = 1
+ 
     for i in range(len(names)):
-        text = names[i]
-        task_object = {}
-        task_object["value"] = i
-        task_object["text"] = text
-        task_object["votes"] = 0
-        dict[i] = task_object
-        if (i+1) % subset_size == 0 or i == len(names) - 1:
-
-            list = []
-            list.append(dict)
-            outer_key = "tasks" + str(taskset_no)
-            outer_dict[outer_key] = list
-            dict = {}
-            taskset_no += 1
-
-    outer_dict["last_used"] = 0
-
-    with open("tasks_database.json", "w", encoding="utf8") as tasks_file:
-        json.dump(outer_dict, tasks_file)
+        new_task = Tasks(text=names[i], votes=0, include=True)
+        db.session.add(new_task)
+        db.session.commit()
+        
 
 def time_convert(sec):
     sec = floor(sec)
@@ -119,12 +104,6 @@ def stopwatch(start_value):
             break
         stopwatch_value = time.time() - start + seconds
 
-def update_times_file():
-
-    with open("times_database.json", "w") as times_file:
-        json.dump({"stopwatch": stopwatch_value}, times_file)
-        #no mdea mees
-
 def timer(duration):
     global timer_value
     start = time.time()
@@ -135,41 +114,32 @@ def timer(duration):
             break
         timer_value = duration - (time.time() - start)
 
-def update_players_file():
-    global players
-    with open("players_database.json", "w", encoding="utf8") as players_database:
-        json.dump(players, players_database)
-
 def choose_tasks():
-    global tasks
 
-    choices_needed = 2
-    chosen_amount = 0
-    choice = []
+    tasks = Tasks.query.filter_by(include = True).all()
+    choice = random.choices(tasks, k=4)
 
-    for i in range(len(tasks["tasks"][0])):
-        candidate = tasks["tasks"][0][str(i + 1)]
-        if candidate["include"] == 1:
-            choice.append(candidate)
-            tasks["tasks"][0][str(i + 1)]["include"] = 0
-            update_tasks_file()
-            chosen_amount += 1
-            if chosen_amount >= choices_needed:
-                break
+    results = [
+        {
+            "value": task.value,
+            "text": task.text,
+            "votes": task.votes
+        } for task in choice
+    ]
+    return results
 
-    return choice
+def get_all_players():
+    players = Players.query.all()
+    results = [
+        {
+            "value": player.value,
+            "text": player.name,
+            "votes": player.votes,
+            "fails": player.fails
 
-def update_tasks_file():
-    global tasks
-    with open("tasks_database.json", "w", encoding="utf8") as tasks_database:
-        json.dump(tasks, tasks_database)
-
-def update_last_used():
-    global last_used_taskset
-
-    last_used_taskset += 1
-    tasks["last_used"] += 1
-    update_tasks_file()
+        } for player in players]
+    
+    return results
 
 @app.route("/", methods=["GET"])
 def index():
@@ -247,31 +217,27 @@ def reset_timer():
 @app.route("/player/get", methods=["GET"])
 def get_players():
     
-    players = Players.query.all()
-    results = [
-        {
-            "value": player.value,
-            "text": player.name,
-            "votes": player.votes,
-            "fails": player.fails
-
-        } for player in players]
-    
+    results = get_all_players()
     return jsonify(results), 200
 
 @app.route("/fail/add/<value>", methods=["POST"])
 def add_fail(value):
-    players["players"][0][str(value)]["fails"] += 1
-    update_players_file()
-    return jsonify(list(players["players"][0].values())), 200
+    player = Players.query.get(value)
+    player.fails += 1
+    db.session.add(player)
+    db.session.commit()
+    return jsonify(get_all_players()), 200
 
 @app.route("/fail/remove/<value>", methods=["POST"])
 def remove_fail(value):
-    if players["players"][0][str(value)]["fails"] > 0:
-        players["players"][0][str(value)]["fails"] -= 1
-        update_players_file()
-    return jsonify(list(players["players"][0].values())), 200
+    player = Players.query.get(value)
+    if player.fails > 0:
+        player.fails -= 1
+    db.session.add(player)
+    db.session.commit()
+    return jsonify(get_all_players()), 200
 
+#TODO: fix
 @app.route("/voting/players/resetvotes", methods=["POST"])
 def reset_playervotes():
     for i in range(len(players["players"][0])):
@@ -286,46 +252,30 @@ def add_player():
     db.session.add(new_player)
     db.session.commit()
     
-    players = Players.query.all()
-    results = [
-        {
-            "value": player.value,
-            "text": player.name,
-            "votes": player.votes,
-            "fails": player.fails
-
-        } for player in players]
+    results = get_all_players()
     
     return jsonify(results), 200
 
-
-    """data = request.json
-    print(data)
-    player_object = {}
-    player_object["value"] = len(players["players"][0]) + 1
-    player_object["text"] = data["name"]
-    player_object["votes"] = 0
-    player_object["fails"] = 0
-    key = str(player_object["value"])
-    players["players"][0][key] = player_object
-    update_players_file()
-    return jsonify(list(players["players"][0].values())), 200"""
-
 @app.route("/player/remove/<value>", methods=["POST"])
 def remove_player(value):
-    players["players"][0].pop(value)
-    update_players_file()
-    return jsonify(list(players["players"][0].values())), 200
+    player = Players.query.get(value)
+    db.session.delete(player)
+    db.session.commit()
+
+    return jsonify(get_all_players()), 200
 
 @app.route("/voting/tasks", methods=["GET"])
 def send_tasks():
-    taskset = "tasks" + str(last_used_taskset + 1)
-    chosen_tasks = list(tasks[taskset][0].values())
-    print(chosen_tasks)
-    return jsonify(chosen_tasks), 200
+    return jsonify(choose_tasks()), 200
 
 @app.route("/voting/tasks/addvote/<id>", methods=["POST"])
 def add_task_vote(id):
+
+    task = Tasks.query.get(id)
+    task.votes += 1
+    db.session.add(task)
+    db.session.commit()
+    
     tasks["tasks"+str(last_used_taskset+1)][0][id]["votes"] += 1
     update_tasks_file()
     return str(tasks["tasks"+str(last_used_taskset+1)][0][id]["votes"]), 200
@@ -333,7 +283,6 @@ def add_task_vote(id):
 @app.route("/voting/end", methods=["POST"])
 def end_voting():
     global last_used_taskset, winner_task
-    print("key: " + str(last_used_taskset+1))
     current_taskset = tasks["tasks" + str(last_used_taskset+1)][0]
     max_votes = 0
     max_votes_key = None
@@ -343,7 +292,6 @@ def end_voting():
             max_votes_key = key
 
     winner_task = current_taskset[max_votes_key]["text"]
-    print(winner_task)
     update_last_used()
 
     return winner_task, 200
@@ -363,5 +311,6 @@ def add_player_vote(value):
 
 if __name__ == "__main__":
 
-    app.run(host="0.0.0.0", port=5000, debug=False)
-
+    #app.run(host="0.0.0.0", port=5000, debug=False)
+    #make_tasks("Sõlme tegemine väikse krutskiga, peast arvutamine, ühel jalal seismine, teksti dešifreerimine, mõistatuse lahendamine, märki viskamine, vee tassimine ühest anumast teise, silmad kinni seismine, muna hoidmine lusika peal, fraasi kordamine, tagurpidi tähestiku lugemine, numbrite lugemine, nööriga pastakas pudelisse, jäätunud särgi lahti harutamine, torni ehitamine")
+    choose_tasks()
