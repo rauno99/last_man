@@ -79,42 +79,18 @@ def make_tasks(input):
         db.session.add(new_task)
         db.session.commit()
 
-#frontendi
-def time_convert(sec):
-    sec = floor(sec)
-    mins = sec // 60
-    sec = sec % 60
-    hours = mins // 60
-    mins = mins % 60
-
-    if sec < 10:
-        sec = "0" + str(sec)
-    if mins < 10:
-        mins = "0" + str(mins)
-    if hours < 10:
-        hours = "0" + str(hours)
-
-    return str(hours) + ":" + str(mins) + ":" + str(sec)
-
 def stopwatch():
+    stopwatch = Times.query.get("stopwatch")
+    if stopwatch == None:
+        stopwatch = Times(name="stopwatch", start_time = time.time(), running = True)
+        db.session.add(stopwatch)
+        db.session.commit()
+    else if stopwatch.running == False:
+        stopwatch.start_time = time.time()
+        stopwatch.running = True
+        db.session.add(stopwatch)
+        db.session.commit()
     
-    stopwatch = Times(name="stopwatch", start_time = time.time(), running = True)
-    db.session.add(stopwatch)
-    db.session.commit()
-
-    """if start_value != 0:
-        array = start_value.split(":")
-        seconds = int(array[0]) * 3600 + int(array[1]) * 60 + int(array[2])
-    else:
-        seconds = 0
-    global stopwatch_value
-    start = time.time()
-
-    while True:
-        if stopwatch_stop_flag:
-            break
-        stopwatch_value = time.time() - start + seconds"""
-
 def timer(duration):
     global timer_value
     start = time.time()
@@ -159,16 +135,15 @@ def index():
 @app.route("/stopper/time", methods=["GET"])
 def get_stopper_time():
     stopwatch = Times.query.get("stopwatch")
-    return jsonify(stopwatch.start_time), 200
-
-    """global stopwatch_value
-    return jsonify({"stopwatch": time_convert(stopwatch_value)})"""
+    if stopwatch == None:
+        return jsonify({"running": False})
+    return jsonify({"stopwatch_start": stopwatch.start_time, "running": stopwatch.running}), 200
 
 #TODO: kas juba käib
 @app.route("/stopper/start", methods=["POST"])
 def start_stopper():
     stopwatch()
-    return "Stopper käib", 200
+    return jsonify({"stopwatch_start": stopwatch.start_time, "running": stopwatch.running}), 200
 
     """global stopwatch_thread, stopwatch_stop_flag
     if stopwatch_thread != None and not stopwatch_thread.is_alive() or stopwatch_thread == None:
@@ -180,22 +155,28 @@ def start_stopper():
         return "Stopper käib", 200
     return "Stopper juba käib", 200"""
 
-@app.route("/stopper/reset", methods=["POST"])
-def reset_stopper():
-    global stopwatch_value, stopwatch_stop_flag, stopwatch_thread
+@app.route("/stopper/resume", methods=["POST"])
+def resume_stopper():
+    stopwatch = Times.query.get("stopwatch")
 
-    stopwatch_stop_flag = True
-    stopwatch_thread.join()
-    stopwatch_value = 0
-    return "stopper reset", 200
+    if stopwatch != None and stopwatch.running == False:
+        stopwatch.running = True
+        db.session.add(stopwatch)
+        db.session.commit()
+
+    return jsonify({"stopwatch_start": stopwatch.start_time, "running": stopwatch.running}), 200
 
 @app.route("/stopper/stop", methods=["POST"])
-def pause_stopper():
-    global stopwatch_thread, stopwatch_stop_flag
+def stop_stopper():
 
-    stopwatch_stop_flag = True
-    stopwatch_thread.join()
-    return "Stopper stopped", 200
+    stopwatch = Times.query.get("stopwatch")
+
+    if stopwatch != None and stopwatch.running == True:
+        stopwatch.running = False
+        db.session.add(stopwatch)
+        db.session.commit()
+
+    return jsonify({"stopwatch_start": stopwatch.start_time, "running": stopwatch.running}), 200
 
 @app.route("/timer/time", methods=["GET"])
 def get_timer_time():
@@ -335,7 +316,7 @@ def add_player_vote(value):
 
 if __name__ == "__main__":
 
-    app.run(host="0.0.0.0", port=5000, debug=False)
+    #app.run(host="0.0.0.0", port=5000, debug=False)
     #make_tasks("Sõlme tegemine väikse krutskiga, peast arvutamine, ühel jalal seismine, teksti dešifreerimine, mõistatuse lahendamine, märki viskamine, vee tassimine ühest anumast teise, silmad kinni seismine, muna hoidmine lusika peal, fraasi kordamine, tagurpidi tähestiku lugemine, numbrite lugemine, nööriga pastakas pudelisse, jäätunud särgi lahti harutamine, torni ehitamine")
     #choose_tasks()
-    #stopwatch()
+    stopwatch()
