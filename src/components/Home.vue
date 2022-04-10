@@ -7,7 +7,7 @@
                     <h1 class="time" v-if="stopper.stopwatch === 'NaN:NaN:NaN'">
                         00:00:00
                     </h1>
-                    <h1 class="time" v-else>{{ stopper.stopwatch }}</h1>
+                    <h1 class="time" v-else>{{ formattedStopper }}</h1>
                 </b-col>
                 <b-col>
                     <h2 class="timeTitle">Järgmise ülesandeni</h2>
@@ -59,7 +59,9 @@ export default {
         return {
             timer: "",
             stopper: "",
-            timePollInterval: null,
+            stopperInterval: null,
+            formattedStopper: null,
+            formattedTimer: null,
             ip: window.location.hostname,
             protocol: "https://",
             players: {},
@@ -81,6 +83,26 @@ export default {
                 .then((res) => (this.timer = res.data));
         },
 
+        formatTime: function() {
+            let currentTime = Math.floor(Date.now() / 1000)
+            let calcStopper = currentTime - this.stopper
+
+            let sec = calcStopper
+            let mins = Math.floor(sec / 60)
+            sec = sec % 60
+            let hours = Math.floor(mins / 60)
+            mins = mins % 60
+
+            if (sec < 10)
+                sec = "0" + sec.toString()
+            if (mins < 10)
+                mins = "0" + mins.toString()
+            if (hours < 10)
+                hours = "0" + hours.toString()
+            this.formattedStopper = hours.toString() + ":" + mins.toString() + ":" + sec.toString()
+
+
+        },
         getPlayers: function() {
             axios
                 .get(this.protocol + this.ip + "/player/get")
@@ -105,7 +127,9 @@ export default {
     },
 
     mounted() {
-        this.timePollInterval = setInterval(() => this.getTimes(), 900);
+        this.getTimes()
+        //this.timePollInterval = setInterval(() => this.getTimes(), 900);
+        this.stopperInterval = setInterval(() => this.formatTime(), 1000);
         this.getPlayers();
         this.getTasks()
     },

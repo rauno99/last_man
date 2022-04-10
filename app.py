@@ -69,7 +69,7 @@ class Times(db.Model):
     name = db.Column('name', db.String(15), primary_key = True)
     start_time = db.Column('start_time', db.Integer()) #seconds since the epoch
     running = db.Column('running', db.Boolean())
-    timer_value = db.Column('timer_value', db.Integer) #start value of timer in seconds
+    timer_value = db.Column('timer_value', db.Integer()) #start value of timer in seconds
 
 def make_tasks(input):
     names = input.split(", ")
@@ -159,7 +159,7 @@ def index():
 @app.route("/stopper/time", methods=["GET"])
 def get_stopper_time():
     stopwatch = Times.query.get("stopwatch")
-    return stopwatch.start_time, 200
+    return jsonify(stopwatch.start_time), 200
 
     """global stopwatch_value
     return jsonify({"stopwatch": time_convert(stopwatch_value)})"""
@@ -318,7 +318,6 @@ def end_voting():
             max_votes_key = key
 
     winner_task = current_taskset[max_votes_key]["text"]
-    update_last_used()
 
     return winner_task, 200
 
@@ -332,12 +331,11 @@ def get_winner_task():
 app.route("/voting/players/addvote/<value>", methods=["POST"])
 def add_player_vote(value):
     players["players"][0][str(value)]["votes"] += 1
-    update_players_file()
     return jsonify(list(players["players"][0].values())), 200
 
 if __name__ == "__main__":
 
-    #app.run(host="0.0.0.0", port=5000, debug=False)
+    app.run(host="0.0.0.0", port=5000, debug=False)
     #make_tasks("Sõlme tegemine väikse krutskiga, peast arvutamine, ühel jalal seismine, teksti dešifreerimine, mõistatuse lahendamine, märki viskamine, vee tassimine ühest anumast teise, silmad kinni seismine, muna hoidmine lusika peal, fraasi kordamine, tagurpidi tähestiku lugemine, numbrite lugemine, nööriga pastakas pudelisse, jäätunud särgi lahti harutamine, torni ehitamine")
     #choose_tasks()
-    stopwatch()
+    #stopwatch()
