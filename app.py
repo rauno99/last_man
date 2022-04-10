@@ -64,7 +64,13 @@ class Tasks(db.Model):
     votes = db.Column('votes', db.Integer())
     include = db.Column('include', db.Boolean())
 
-#TODO: fix
+class Times(db.Model):
+    __tablename__ = "times"
+    name = db.Column('name', db.String(15), primary_key = True)
+    start_time = db.Column('start_time', db.Integer()) #seconds since the epoch
+    running = db.Column('running', db.Boolean())
+    timer_value = db.Column('timer_value', db.Integer) #start value of timer in seconds
+
 def make_tasks(input):
     names = input.split(", ")
  
@@ -72,8 +78,8 @@ def make_tasks(input):
         new_task = Tasks(text=names[i], votes=0, include=True)
         db.session.add(new_task)
         db.session.commit()
-        
 
+#frontendi
 def time_convert(sec):
     sec = floor(sec)
     mins = sec // 60
@@ -90,8 +96,13 @@ def time_convert(sec):
 
     return str(hours) + ":" + str(mins) + ":" + str(sec)
 
-def stopwatch(start_value):
-    if start_value != 0:
+def stopwatch():
+    
+    stopwatch = Times(name="stopwatch", start_time = time.time(), running = True)
+    db.session.add(stopwatch)
+    db.session.commit()
+
+    """if start_value != 0:
         array = start_value.split(":")
         seconds = int(array[0]) * 3600 + int(array[1]) * 60 + int(array[2])
     else:
@@ -102,7 +113,7 @@ def stopwatch(start_value):
     while True:
         if stopwatch_stop_flag:
             break
-        stopwatch_value = time.time() - start + seconds
+        stopwatch_value = time.time() - start + seconds"""
 
 def timer(duration):
     global timer_value
@@ -137,8 +148,8 @@ def get_all_players():
             "votes": player.votes,
             "fails": player.fails
 
-        } for player in players]
-    
+        } for player in players
+    ]
     return results
 
 @app.route("/", methods=["GET"])
@@ -147,12 +158,19 @@ def index():
 
 @app.route("/stopper/time", methods=["GET"])
 def get_stopper_time():
-    global stopwatch_value
-    return jsonify({"stopwatch": time_convert(stopwatch_value)})
+    stopwatch = Times.query.get("stopwatch")
+    return stopwatch.start_time, 200
 
+    """global stopwatch_value
+    return jsonify({"stopwatch": time_convert(stopwatch_value)})"""
+
+#TODO: kas juba käib
 @app.route("/stopper/start", methods=["POST"])
 def start_stopper():
-    global stopwatch_thread, stopwatch_stop_flag
+    stopwatch()
+    return "Stopper käib", 200
+
+    """global stopwatch_thread, stopwatch_stop_flag
     if stopwatch_thread != None and not stopwatch_thread.is_alive() or stopwatch_thread == None:
         data = request.json
         start_value = data["duration"]
@@ -160,7 +178,7 @@ def start_stopper():
         stopwatch_thread = Thread(target=stopwatch, args=(start_value,))
         stopwatch_thread.start()
         return "Stopper käib", 200
-    return "Stopper juba käib", 200
+    return "Stopper juba käib", 200"""
 
 @app.route("/stopper/reset", methods=["POST"])
 def reset_stopper():
@@ -216,9 +234,7 @@ def reset_timer():
 
 @app.route("/player/get", methods=["GET"])
 def get_players():
-    
-    results = get_all_players()
-    return jsonify(results), 200
+    return jsonify(get_all_players()), 200
 
 @app.route("/fail/add/<value>", methods=["POST"])
 def add_fail(value):
@@ -235,15 +251,23 @@ def remove_fail(value):
         player.fails -= 1
     db.session.add(player)
     db.session.commit()
-    return jsonify(get_all_players()), 200
+
 
 #TODO: fix
 @app.route("/voting/players/resetvotes", methods=["POST"])
 def reset_playervotes():
-    for i in range(len(players["players"][0])):
+    players = Players.query.all()
+    
+    for player in players:
+        player.votes = 0
+        db.session.add(player)
+        db.session.commit()
+    return jsonify(get_all_players()), 200
+
+    """for i in range(len(players["players"][0])):
         players["players"][0][str(i)]["votes"] = 0
     update_players_file()
-    return "Votes cleared", 200
+    return "Votes cleared", 200"""
 
 @app.route("/player/add", methods=["POST"])
 def add_player():
@@ -275,10 +299,12 @@ def add_task_vote(id):
     task.votes += 1
     db.session.add(task)
     db.session.commit()
+
+    return 
     
-    tasks["tasks"+str(last_used_taskset+1)][0][id]["votes"] += 1
+    """tasks["tasks"+str(last_used_taskset+1)][0][id]["votes"] += 1
     update_tasks_file()
-    return str(tasks["tasks"+str(last_used_taskset+1)][0][id]["votes"]), 200
+    return str(tasks["tasks"+str(last_used_taskset+1)][0][id]["votes"]), 200"""
 
 @app.route("/voting/end", methods=["POST"])
 def end_voting():
@@ -313,4 +339,5 @@ if __name__ == "__main__":
 
     #app.run(host="0.0.0.0", port=5000, debug=False)
     #make_tasks("Sõlme tegemine väikse krutskiga, peast arvutamine, ühel jalal seismine, teksti dešifreerimine, mõistatuse lahendamine, märki viskamine, vee tassimine ühest anumast teise, silmad kinni seismine, muna hoidmine lusika peal, fraasi kordamine, tagurpidi tähestiku lugemine, numbrite lugemine, nööriga pastakas pudelisse, jäätunud särgi lahti harutamine, torni ehitamine")
-    choose_tasks()
+    #choose_tasks()
+    stopwatch()
