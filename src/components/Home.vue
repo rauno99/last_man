@@ -60,8 +60,11 @@ export default {
             timer: "",
             stopper: "",
             stopperInterval: null,
+            timePollInterval: null,
             formattedStopper: null,
             formattedTimer: null,
+            stopperAlive: false,
+            timerAlive: false,
             ip: window.location.hostname,
             protocol: "https://",
             players: {},
@@ -75,33 +78,32 @@ export default {
     },
     methods: {
         getTimes: function () {
-            axios
-                .get(this.protocol + this.ip + "/stopper/time")
-                .then((res) => (this.stopper = res.data));
-            axios
-                .get(this.protocol + this.ip + "/timer/time")
-                .then((res) => (this.timer = res.data));
+            axios.get(this.protocol + this.ip + "/stopper/time").then((res) => {
+                    this.stopper = res.data.stopwatch_start
+                    this.stopperAlive = res.data.running
+                });
+            axios.get(this.protocol + this.ip + "/timer/time").then((res) => (this.timer = res.data));
         },
 
-        formatTime: function() {
-            let currentTime = Math.floor(Date.now() / 1000)
-            let calcStopper = currentTime - this.stopper
+        formatStopper: function() {
+            if (this.stopperAlive) {
+                let currentTime = Math.floor(Date.now() / 1000)
+                let calcStopper = currentTime - this.stopper
 
-            let sec = calcStopper
-            let mins = Math.floor(sec / 60)
-            sec = sec % 60
-            let hours = Math.floor(mins / 60)
-            mins = mins % 60
+                let sec = calcStopper
+                let mins = Math.floor(sec / 60)
+                sec = sec % 60
+                let hours = Math.floor(mins / 60)
+                mins = mins % 60
 
-            if (sec < 10)
-                sec = "0" + sec.toString()
-            if (mins < 10)
-                mins = "0" + mins.toString()
-            if (hours < 10)
-                hours = "0" + hours.toString()
-            this.formattedStopper = hours.toString() + ":" + mins.toString() + ":" + sec.toString()
-
-
+                if (sec < 10)
+                    sec = "0" + sec.toString()
+                if (mins < 10)
+                    mins = "0" + mins.toString()
+                if (hours < 10)
+                    hours = "0" + hours.toString()
+                this.formattedStopper = hours.toString() + ":" + mins.toString() + ":" + sec.toString()
+            }
         },
         getPlayers: function() {
             axios
@@ -128,8 +130,8 @@ export default {
 
     mounted() {
         this.getTimes()
-        //this.timePollInterval = setInterval(() => this.getTimes(), 900);
-        this.stopperInterval = setInterval(() => this.formatTime(), 1000);
+        this.timePollInterval = setInterval(() => this.getTimes(), 5000);
+        this.stopperInterval = setInterval(() => this.formatStopper(), 1000);
         this.getPlayers();
         this.getTasks()
     },

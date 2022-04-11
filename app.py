@@ -78,18 +78,6 @@ def make_tasks(input):
         new_task = Tasks(text=names[i], votes=0, include=True)
         db.session.add(new_task)
         db.session.commit()
-
-def stopwatch():
-    stopwatch = Times.query.get("stopwatch")
-    if stopwatch == None:
-        stopwatch = Times(name="stopwatch", start_time = time.time(), running = True)
-        db.session.add(stopwatch)
-        db.session.commit()
-    else if stopwatch.running == False:
-        stopwatch.start_time = time.time()
-        stopwatch.running = True
-        db.session.add(stopwatch)
-        db.session.commit()
     
 def timer(duration):
     global timer_value
@@ -142,18 +130,17 @@ def get_stopper_time():
 #TODO: kas juba käib
 @app.route("/stopper/start", methods=["POST"])
 def start_stopper():
-    stopwatch()
+    stopwatch = Times.query.get("stopwatch")
+    if stopwatch == None:
+        stopwatch = Times(name="stopwatch", start_time = time.time(), running = True)
+        db.session.add(stopwatch)
+        db.session.commit()
+    elif stopwatch.running == False:
+        stopwatch.start_time = time.time()
+        stopwatch.running = True
+        db.session.add(stopwatch)
+        db.session.commit()
     return jsonify({"stopwatch_start": stopwatch.start_time, "running": stopwatch.running}), 200
-
-    """global stopwatch_thread, stopwatch_stop_flag
-    if stopwatch_thread != None and not stopwatch_thread.is_alive() or stopwatch_thread == None:
-        data = request.json
-        start_value = data["duration"]
-        stopwatch_stop_flag = False
-        stopwatch_thread = Thread(target=stopwatch, args=(start_value,))
-        stopwatch_thread.start()
-        return "Stopper käib", 200
-    return "Stopper juba käib", 200"""
 
 @app.route("/stopper/resume", methods=["POST"])
 def resume_stopper():
@@ -232,6 +219,7 @@ def remove_fail(value):
         player.fails -= 1
     db.session.add(player)
     db.session.commit()
+    return jsonify(get_all_players()), 200
 
 
 #TODO: fix
