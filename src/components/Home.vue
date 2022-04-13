@@ -1,6 +1,5 @@
 <template>
     <div>
-        <b-container fluid>
             <b-row class="text-center">
                 <b-col>
                     <h2 class="timeTitle">Seistud aeg</h2>
@@ -38,11 +37,16 @@
             </b-row>
             <b-row>
                 <b-col>
-                    <vue-poll v-if="showPoll" v-bind="pollOptions" @addvote="addVote" />
+                    <vue-poll v-if="showTaskPoll" v-bind="taskPollOptions" @addvote="addTaskVote" />
                     <h1 class="timeTitle" v-else>"Hääletatud!"</h1>
                 </b-col>
             </b-row>
-        </b-container>
+            <b-row>
+                <b-col>
+                    <vue-poll v-if="showPlayerPoll" v-bind="playerPollOptions" @addvote="addPlayerVote" />
+                    <h1 class="timeTitle" v-else>"Hääletatud!"</h1>
+                </b-col>
+            </b-row>
     </div>
 </template>
 
@@ -68,12 +72,18 @@ export default {
             ip: window.location.hostname,
             protocol: "https://",
             players: {},
-            pollOptions: {
-                question: "Järgmine ülesanne",
+            taskPollOptions: {
+                question: "Ülesande hääletus",
                 answers: [
                 ]
             },
-            showPoll: true
+            playerPollOptions: {
+                question: "Mängija hääletus",
+                answers: [
+                ]
+            },
+            showPlayerPoll: true,
+            showTaskPoll: true
         };
     },
     methods: {
@@ -82,7 +92,7 @@ export default {
                     this.stopper = res.data.stopwatch_start
                     this.stopperAlive = res.data.running
                 });
-            axios.get(this.protocol + this.ip + "/timer/time").then((res) => (this.timer = res.data));
+            //axios.get(this.protocol + this.ip + "/timer/time").then((res) => (this.timer = res.data));
         },
 
         formatStopper: function() {
@@ -110,6 +120,7 @@ export default {
                 .get(this.protocol + this.ip + "/player/get")
                 .then((res) => {
                     this.players = res.data
+                    this.playerPollOptions.answers = res.data
                 });     
         },
         calcX: function(n) {
@@ -119,12 +130,17 @@ export default {
             axios
                 .get(this.protocol + this.ip + "/voting/tasks")
                 .then((res) => {
-                    this.pollOptions.answers = res.data
+                    this.taskPollOptions.answers = res.data
                 });
         },
-        addVote: function(obj) {
-            this.showPoll = false
+        addTaskVote: function(obj) {
+            this.showTaskPoll = false
             axios.post(this.protocol + this.ip + "/voting/tasks/addvote/" + obj.value.toString())
+        },
+
+        addPlayerVote: function(obj) {
+            this.showPlayerPoll = false
+            //axios.post(this.protocol + this.ip + "/voting/tasks/addvote/" + obj.value.toString())
         }
     },
 
@@ -133,7 +149,7 @@ export default {
         this.timePollInterval = setInterval(() => this.getTimes(), 5000);
         this.stopperInterval = setInterval(() => this.formatStopper(), 1000);
         this.getPlayers();
-        this.getTasks()
+        this.getTasks();
     },
 };
 </script>

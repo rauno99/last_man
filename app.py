@@ -69,6 +69,7 @@ class Tasks(db.Model):
     text = db.Column('text', db.String(300))
     votes = db.Column('votes', db.Integer())
     include = db.Column('include', db.Boolean())
+    in_voting = db.Column('in_voting', db.Boolean())
 
 class Times(db.Model):
     __tablename__ = "times"
@@ -96,8 +97,7 @@ def timer(duration):
         timer_value = duration - (time.time() - start)
 
 def choose_tasks():
-
-    tasks = Tasks.query.filter_by(include = True).all()
+    tasks = Tasks.query.filter_by(include = True).all()      
     choice = random.choices(tasks, k=4)
 
     results = [
@@ -250,9 +250,7 @@ def add_player():
     new_player = Players(name=data["name"], fails=0, votes=0, include=True)
     db.session.add(new_player)
     db.session.commit()
-    
     results = get_all_players()
-    
     return jsonify(results), 200
 
 @app.route("/player/remove/<value>", methods=["POST"])
@@ -260,7 +258,6 @@ def remove_player(value):
     player = Players.query.get(value)
     db.session.delete(player)
     db.session.commit()
-
     return jsonify(get_all_players()), 200
 
 @app.route("/voting/tasks", methods=["GET"])
@@ -269,7 +266,6 @@ def send_tasks():
 
 @app.route("/voting/tasks/addvote/<id>", methods=["POST"])
 def add_task_vote(id):
-
     task = Tasks.query.get(id)
     task.votes += 1
     db.session.add(task)
