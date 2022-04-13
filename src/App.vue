@@ -12,6 +12,18 @@
       shadow
     >
       <div class="px-3 py-2">
+        Mis on Last Man Standing?
+
+        Last Man Standing puhul on tegemist vastupidavuse võistlusega, mille raames selgitatakse välja kõige kõigem Tartu tudeng.
+
+        Üritus algab kella 12.00st ning kestab kuni viimane võistleja on üksi püsti.
+
+        Pealtvaatajatel on võimalus antud veebilehe kaudu anda hääl ürituse käekäiguks. 
+
+        Ülesande hääletuse puhul saate anda oma hääle järgmisena toimuva ülesande valikuks. Kõige halvemini ülesande täitnud või ajaliselt kõige aeglasem olnud võistleja kaotab ühe elu. Kokku on võistlejatele antud viis elu.
+
+        Mängija hääletuse puhul saab anda oma panuse ühe võistleja päästmiseks. Päästmine tähendab, et võistlejal ei ole võimalus järgmise ülesande sooritamise käigus elu kaotada. Iga ülesande ajal saab olla korraga päästetud üks võistleja ning sama võistleja ei saa olla päästetud kahe järjestikuse ülesande täitmisel.
+
       </div>
     </b-sidebar>
     <b-row class="text-center">
