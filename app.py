@@ -78,7 +78,7 @@ class Times(db.Model):
     running = db.Column('running', db.Boolean())
     timer_value = db.Column('timer_value', db.Integer()) #start value of timer in seconds
 
-def make_tasks(input):
+def make_tasks(input="Sõlme tegemine väikse krutskiga, peast arvutamine, ühel jalal seismine, teksti dešifreerimine, mõistatuse lahendamine, märki viskamine, vee tassimine ühest anumast teise, silmad kinni seismine, muna hoidmine lusika peal, fraasi kordamine, tagurpidi tähestiku lugemine, numbrite lugemine, nööriga pastakas pudelisse, jäätunud särgi lahti harutamine, torni ehitamine"):
     names = input.split(", ")
  
     for i in range(len(names)):
@@ -173,8 +173,10 @@ def stop_stopper():
 
 @app.route("/timer/time", methods=["GET"])
 def get_timer_time():
-    global timer_value
-    return jsonify({"timer": time_convert(timer_value)})
+    timer = Times.query.get("timer")
+    if timer == None:
+        return jsonify({"running": False})
+    return jsonify({"timer_start": timer.start_time, "running": timer.running, "timer_value": timer.timer_value}), 200
 
 @app.route("/timer/start", methods=["POST"])
 def start_timer():

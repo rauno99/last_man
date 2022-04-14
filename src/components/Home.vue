@@ -3,17 +3,11 @@
             <b-row class="text-center">
                 <b-col>
                     <h2 class="timeTitle">Seistud aeg</h2>
-                    <h1 class="time" v-if="stopper.stopwatch === 'NaN:NaN:NaN'">
-                        00:00:00
-                    </h1>
-                    <h1 class="time" v-else>{{ formattedStopper }}</h1>
+                    <h1 class="time">{{ formattedStopper }}</h1>
                 </b-col>
                 <b-col>
                     <h2 class="timeTitle">Järgmise ülesandeni</h2>
-                    <h1 class="time" v-if="timer.timer === 'NaN:NaN:NaN'">
-                        00:00:00
-                    </h1>
-                    <h1 v-else class="time">{{ timer.timer }}</h1>
+                    <h1 class="time">{{ formattedTimer }}</h1>
                 </b-col>
             </b-row>
             <hr>
@@ -64,6 +58,7 @@ export default {
             timer: "",
             stopper: "",
             stopperInterval: null,
+            timerInterval: null,
             timePollInterval: null,
             formattedStopper: null,
             formattedTimer: null,
@@ -175,6 +170,7 @@ export default {
         this.getTimes()
         this.timePollInterval = setInterval(() => this.getTimes(), 5000);
         this.stopperInterval = setInterval(() => this.formatStopper(), 1000);
+        this.timerInterval = setInterval(() => this.formatTimer(), 1000);
         this.getPlayers();
         this.getTasks();
     },

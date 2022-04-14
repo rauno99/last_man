@@ -8,7 +8,7 @@
                 </b-col>
                 <b-col>
                     <h2 class="timeTitle">Järgmise ülesandeni</h2>
-                    <h1 class="time">{{ timer.timer }}</h1>
+                    <h1 class="time">{{ formattedTimer }}</h1>
                 </b-col>
             </b-row>
             <b-row class=text-center>
@@ -19,7 +19,7 @@
                     <b-button class="m-1" @click="stopStopper">Stop</b-button>
                 </b-col>
                 <b-col>
-                    <input v-model="timerDuration" placeholder="Minutid">
+                    <input v-model="timerUserDuration" placeholder="Minutid">
                     <b-button class="m-1" @click="startTimer">Start</b-button>
                     <b-button class="m-1" @click="resumeTimer">Resume</b-button>
                     <b-button class="m-1" @click="stopTimer">Stop</b-button>
@@ -88,9 +88,11 @@
                 timer: '',
                 stopper: '',
                 stopperInterval: null,
+                timerInterval: null,
                 formattedStopper: null,
                 formattedTimer: null,
                 timePollInterval: null,
+                timerUserDuration: null,
                 playerName: '',
                 timerDuration: '',
                 stopperDuration: '',
@@ -115,7 +117,11 @@
                     this.stopper = res.data.stopwatch_start
                     this.stopperAlive = res.data.running
                 });
-            //axios.get(this.protocol + this.ip + "/timer/time").then((res) => (this.timer = res.data));
+            axios.get(this.protocol + this.ip + "/timer/time").then((res) => {
+                this.timer = res.data.timer_start
+                this.timerAlive = res.data.running
+                this.timerDuration = res.data.timer_value
+            });
         },
         startStopper: function () {
             /*let sendData = ''
@@ -163,14 +169,36 @@
                 this.formattedStopper = hours.toString() + ":" + mins.toString() + ":" + sec.toString()
             }
         },
+
+        formatTimer: function() {
+            if (this.timerAlive) {
+                let currentTime = Math.floor(Date.now() / 1000)
+                let calcTimer = this.timerDuration - (currentTime - this.timer)
+
+                let sec = calcTimer
+                let mins = Math.floor(sec / 60)
+                sec = sec % 60
+                let hours = Math.floor(mins / 60)
+                mins = mins % 60
+
+                if (sec < 10)
+                    sec = "0" + sec.toString()
+                if (mins < 10)
+                    mins = "0" + mins.toString()
+                if (hours < 10)
+                    hours = "0" + hours.toString()
+                this.formattedTimer = hours.toString() + ":" + mins.toString() + ":" + sec.toString()
+            }
+        },
         startTimer: function () {
-            let timerMinutes = this.timerDuration * 60
-            axios.post(this.protocol + this.ip + "/timer/start", {
-                "duration": timerMinutes
-            }).then((response) => {
-                this.timerDuration = ''
-                console.log(response)
-            });
+            let timerMinutes = this.timerUserDuration * 60
+            if (timerMinutes !== 0) {
+                axios.post(this.protocol + this.ip + "/timer/start", {
+                    "duration": timerMinutes
+                }).then((response) => {
+                    this.timerUserDuration = ''
+                });
+            }
         },
         resumeTimer: function () {
             axios.post(this.protocol + this.ip + "/timer/resume");
@@ -244,6 +272,7 @@
         this.getTimes();
         this.stopperInterval = setInterval(() => this.formatStopper(), 1000);
         this.timePollInterval = setInterval(() => this.getTimes(), 5000);
+        this.timerInterval = setInterval(() => this.formatTimer(), 1000);
         this.getPlayers();
         this.getTasks()
     },
