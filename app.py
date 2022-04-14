@@ -178,24 +178,30 @@ def get_timer_time():
 
 @app.route("/timer/start", methods=["POST"])
 def start_timer():
-    global timer_thread, timer_stop_flag
-    if timer_thread != None and not timer_thread.is_alive() or timer_thread == None:
-
-        data = request.json
-        duration = data["duration"]
-        timer_stop_flag = False
-        timer_thread = Thread(target=timer, args=(duration,))
-        timer_thread.start()
-        return "Taimer käib", 200
-    return "Taimer juba käib", 200
+    data = request.json
+    timer = Times.query.get("timer")
+    if timer == None:
+        timer = Times(name="timer", start_time = time.time(), running = True, timer_value = data["duration"])
+        db.session.add(timer)
+        db.session.commit()
+    elif timer.running == False:
+        timer.start_time = time.time()
+        timer.running = True
+        timer.timer_value = data["duration"]
+        db.session.add(timer)
+        db.session.commit()
+    return jsonify({"timer_start": timer.start_time, "running": timer.running, "timer_value": timer.timer_value}), 200
 
 @app.route("/timer/stop", methods=["POST"])
-def pause_timer():
-    global timer_thread, timer_stop_flag
+def stop_timer():
+    timer = Times.query.get("timer")
 
-    timer_stop_flag = True
-    timer_thread.join()
-    return "Taimer seisab", 200
+    if timer != None and timer.running == True:
+        timer.running = False
+        db.session.add(timer)
+        db.session.commit()
+
+    return jsonify({"timer_start": timer.start_time, "running": timer.running, "timer_value": timer.timer_value}), 200
 
 @app.route("/timer/reset", methods=["POST"])
 def reset_timer():

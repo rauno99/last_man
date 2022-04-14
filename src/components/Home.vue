@@ -69,8 +69,9 @@ export default {
             formattedTimer: null,
             stopperAlive: false,
             timerAlive: false,
-            ip: window.location.hostname,
-            protocol: "https://",
+            timerDuration: null,
+            ip: window.location.hostname + ":5000",
+            protocol: "http://",
             players: {},
             taskPollOptions: {
                 question: "Ülesande hääletus",
@@ -92,7 +93,11 @@ export default {
                     this.stopper = res.data.stopwatch_start
                     this.stopperAlive = res.data.running
                 });
-            //axios.get(this.protocol + this.ip + "/timer/time").then((res) => (this.timer = res.data));
+            axios.get(this.protocol + this.ip + "/timer/time").then((res) => {
+                this.timer = res.data.timer_start
+                this.timerAlive = res.data.running
+                this.timerDuration = res.data.timer_value
+            });
         },
 
         formatStopper: function() {
@@ -115,6 +120,28 @@ export default {
                 this.formattedStopper = hours.toString() + ":" + mins.toString() + ":" + sec.toString()
             }
         },
+        formatTimer: function() {
+            if (this.timerAlive) {
+                let currentTime = Math.floor(Date.now() / 1000)
+                let calcTimer = this.timerDuration - (currentTime - this.timer)
+
+                let sec = calcTimer
+                let mins = Math.floor(sec / 60)
+                sec = sec % 60
+                let hours = Math.floor(mins / 60)
+                mins = mins % 60
+
+                if (sec < 10)
+                    sec = "0" + sec.toString()
+                if (mins < 10)
+                    mins = "0" + mins.toString()
+                if (hours < 10)
+                    hours = "0" + hours.toString()
+                this.formattedTimer = hours.toString() + ":" + mins.toString() + ":" + sec.toString()
+            }
+        },
+
+
         getPlayers: function() {
             axios
                 .get(this.protocol + this.ip + "/player/get")
