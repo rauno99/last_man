@@ -264,9 +264,10 @@
                 });
         },
         endTasksPoll: function() {
-            axios.post(this.protocol + this.ip + "/voting/end")
+            axios.post(this.protocol + this.ip + "/voting/tasks/end")
             .then((response) => {
-                this.mostPopularTask = response.data
+                this.mostPopularTask = response.data.winner
+                this.pollOptions.answers = response.data.tasks
             });
             this.getTasks();    
         }

@@ -54,7 +54,6 @@ def read_players():
 
 read_players()
 read_tasks()
-
 class Players(db.Model):
     __tablename__ = "players"
     value = db.Column('value', db.Integer(), primary_key = True)
@@ -62,7 +61,6 @@ class Players(db.Model):
     fails = db.Column('fails', db.Integer())
     votes = db.Column('votes', db.Integer())
     include = db.Column('include', db.Boolean())
-
 class Tasks(db.Model):
     __tablename__ = "tasks"
     value = db.Column('value', db.Integer(), primary_key = True)
@@ -83,7 +81,7 @@ def make_tasks(input="Sõlme tegemine väikse krutskiga, peast arvutamine, ühel
     names = input.split(", ")
  
     for i in range(len(names)):
-        new_task = Tasks(text=names[i], votes=0, include=True)
+        new_task = Tasks(text=names[i], votes=0, include=True, in_voting=False)
         db.session.add(new_task)
         db.session.commit()
     
@@ -97,8 +95,17 @@ def make_tasks(input="Sõlme tegemine väikse krutskiga, peast arvutamine, ühel
             break
         timer_value = duration - (time.time() - start)"""
 
+def reset_in_voting_tasks():
+    tasks = Tasks.query.all() 
+    for task in tasks:
+        task.in_voting = False
+        db.session.add(task)
+        db.session.commit()    
+
+
 def choose_tasks():
-    tasks = Tasks.query.filter_by(include = True).all()      
+    reset_in_voting_tasks()
+    tasks = Tasks.query.filter_by(include = True).all()     
     choice = random.choices(tasks, k=4)
 
     results = []
@@ -118,6 +125,7 @@ def choose_tasks():
 
     return results
 
+
 def get_all_players():
     players = Players.query.order_by(Players.value).all()
 
@@ -130,7 +138,6 @@ def get_all_players():
 
         } for player in players
     ]
-    print(results)
     return results
 
 @app.route("/", methods=["GET"])
@@ -251,8 +258,8 @@ def remove_fail(value):
 
 
 #TODO: fix
-@app.route("/voting/players/resetvotes", methods=["POST"])
-def reset_playervotes():
+@app.route("/voting/players/end", methods=["POST"])
+def end_playervotes():
     players = Players.query.all()
     
     for player in players:
@@ -277,9 +284,22 @@ def remove_player(value):
     db.session.commit()
     return jsonify(get_all_players()), 200
 
+def get_in_voting_tasks():
+    tasks = Tasks.query.filter_by(in_voting = True).all()      
+    results = [
+        {
+            "value": task.value,
+            "text": task.text,
+            "votes": task.votes
+        } for task in tasks
+    ]
+
+    return results
+
 @app.route("/voting/tasks", methods=["GET"])
 def send_tasks():
-    return jsonify(choose_tasks()), 200
+    results = get_in_voting_tasks()
+    return jsonify(results), 200
 
 @app.route("/voting/tasks/addvote/<id>", methods=["POST"])
 def add_task_vote(id):
@@ -288,26 +308,28 @@ def add_task_vote(id):
     db.session.add(task)
     db.session.commit()
 
-    return 
+    return jsonify(get_in_voting_tasks()), 200
     
     """tasks["tasks"+str(last_used_taskset+1)][0][id]["votes"] += 1
     update_tasks_file()
     return str(tasks["tasks"+str(last_used_taskset+1)][0][id]["votes"]), 200"""
 
-@app.route("/voting/end", methods=["POST"])
+def reset_tasks_votes():
+    tasks = Tasks.query.all()
+    for task in tasks:
+        task.votes = 0
+        db.session.add(task)
+        db.session.commit()
+
+@app.route("/voting/tasks/end", methods=["POST"])
 def end_voting():
-    global last_used_taskset, winner_task
-    current_taskset = tasks["tasks" + str(last_used_taskset+1)][0]
-    max_votes = 0
-    max_votes_key = None
-
-    for key in current_taskset.keys():
-        if current_taskset[key]["votes"] > max_votes:
-            max_votes_key = key
-
-    winner_task = current_taskset[max_votes_key]["text"]
-
-    return winner_task, 200
+    winner_task = Tasks.query.order_by(Tasks.votes.desc()).first()
+    winner_task.include = False
+    db.session.add(winner_task)
+    db.session.commit()
+    reset_tasks_votes()
+    choose_tasks()
+    return jsonify({"winner": winner_task.text, "tasks": get_in_voting_tasks()}), 200
 
 @app.route("/voting/winner_task", methods=["GET"])
 def get_winner_task():
@@ -325,6 +347,6 @@ def add_player_vote(value):
 if __name__ == "__main__":
 
     app.run(host="0.0.0.0", port=5000, debug=False)
-    #make_tasks("Sõlme tegemine väikse krutskiga, peast arvutamine, ühel jalal seismine, teksti dešifreerimine, mõistatuse lahendamine, märki viskamine, vee tassimine ühest anumast teise, silmad kinni seismine, muna hoidmine lusika peal, fraasi kordamine, tagurpidi tähestiku lugemine, numbrite lugemine, nööriga pastakas pudelisse, jäätunud särgi lahti harutamine, torni ehitamine")
+    #make_tasks()
     #choose_tasks()
     #stopwatch()
