@@ -88,6 +88,7 @@
                 timer: '',
                 stopper: '',
                 stopperInterval: null,
+                stopperValueAtStop: null,
                 timerInterval: null,
                 formattedStopper: null,
                 formattedTimer: null,
@@ -108,7 +109,8 @@
                 ],
                 showResults: true,
             },
-                mostPopularTask: ""
+                mostPopularTask: "",
+                loading: true
             }
         },
         methods: {
@@ -116,6 +118,7 @@
             axios.get(this.protocol + this.ip + "/stopper/time").then((res) => {
                     this.stopper = res.data.stopwatch_start
                     this.stopperAlive = res.data.running
+                    this.stopperValueAtStop = res.data.value_at_stop
                 });
             axios.get(this.protocol + this.ip + "/timer/time").then((res) => {
                 this.timer = res.data.timer_start
@@ -134,25 +137,28 @@
             axios.post(this.protocol + this.ip + "/stopper/start").then((response) => {
                 this.stopper = response.data.stopwatch_start
                 this.stopperAlive = response.data.running
+                this.stopperValueAtStop = response.data.value_at_stop
             });
         },
         resumeStopper: function () {
             axios.post(this.protocol + this.ip + "/stopper/resume").then((response) => {
                 this.stopper = response.data.stopwatch_start
                 this.stopperAlive = response.data.running
+                this.stopperValueAtStop = response.data.value_at_stop
             });
         },
         stopStopper: function () {
             axios.post(this.protocol + this.ip + "/stopper/stop").then((response) => {
                 this.stopper = response.data.stopwatch_start
                 this.stopperAlive = response.data.running
+                this.stopperValueAtStop = response.data.value_at_stop
             });
         },
 
         formatStopper: function() {
-            if (this.stopperAlive) {
+            if (this.stopperAlive || this.loading) {
                 let currentTime = Math.floor(Date.now() / 1000)
-                let calcStopper = currentTime - this.stopper
+                let calcStopper = currentTime - this.stopper + this.stopperValueAtStop
 
                 let sec = calcStopper
                 let mins = Math.floor(sec / 60)
@@ -270,11 +276,13 @@
 
     mounted() {
         this.getTimes();
+        this.formatStopper();
+        this.loading = false;
         this.stopperInterval = setInterval(() => this.formatStopper(), 1000);
         this.timePollInterval = setInterval(() => this.getTimes(), 5000);
         this.timerInterval = setInterval(() => this.formatTimer(), 1000);
         this.getPlayers();
-        this.getTasks()
+        this.getTasks();
     },
 };
 </script>

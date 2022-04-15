@@ -77,6 +77,7 @@ class Times(db.Model):
     start_time = db.Column('start_time', db.Integer()) #seconds since the epoch
     running = db.Column('running', db.Boolean())
     timer_value = db.Column('timer_value', db.Integer()) #start value of timer in seconds
+    value_at_stop = db.Column('value_at_stop', db.Integer()) #amount of seconds before stop
 
 def make_tasks(input="Sõlme tegemine väikse krutskiga, peast arvutamine, ühel jalal seismine, teksti dešifreerimine, mõistatuse lahendamine, märki viskamine, vee tassimine ühest anumast teise, silmad kinni seismine, muna hoidmine lusika peal, fraasi kordamine, tagurpidi tähestiku lugemine, numbrite lugemine, nööriga pastakas pudelisse, jäätunud särgi lahti harutamine, torni ehitamine"):
     names = input.split(", ")
@@ -86,7 +87,7 @@ def make_tasks(input="Sõlme tegemine väikse krutskiga, peast arvutamine, ühel
         db.session.add(new_task)
         db.session.commit()
     
-def timer(duration):
+"""def timer(duration):
     global timer_value
     start = time.time()
 
@@ -94,23 +95,32 @@ def timer(duration):
         if timer_stop_flag or timer_value < 0:
             timer_value = 0
             break
-        timer_value = duration - (time.time() - start)
+        timer_value = duration - (time.time() - start)"""
 
 def choose_tasks():
     tasks = Tasks.query.filter_by(include = True).all()      
     choice = random.choices(tasks, k=4)
 
-    results = [
-        {
+    results = []
+
+    for task in choice:
+        task_object =  {
             "value": task.value,
             "text": task.text,
             "votes": task.votes
-        } for task in choice
-    ]
+        } 
+
+        results.append(task_object)
+        queried_task = Tasks.query.get(task.value)
+        queried_task.in_voting = True
+        db.session.add(queried_task)
+        db.session.commit()
+
     return results
 
 def get_all_players():
-    players = Players.query.all()
+    players = Players.query.order_by(Players.value).all()
+
     results = [
         {
             "value": player.value,
@@ -120,6 +130,7 @@ def get_all_players():
 
         } for player in players
     ]
+    print(results)
     return results
 
 @app.route("/", methods=["GET"])
@@ -131,22 +142,23 @@ def get_stopper_time():
     stopwatch = Times.query.get("stopwatch")
     if stopwatch == None:
         return jsonify({"running": False})
-    return jsonify({"stopwatch_start": stopwatch.start_time, "running": stopwatch.running}), 200
+    return jsonify({"stopwatch_start": stopwatch.start_time, "running": stopwatch.running, "value_at_stop": stopwatch.value_at_stop}), 200
 
 #TODO: kas juba käib
 @app.route("/stopper/start", methods=["POST"])
 def start_stopper():
     stopwatch = Times.query.get("stopwatch")
     if stopwatch == None:
-        stopwatch = Times(name="stopwatch", start_time = time.time(), running = True)
+        stopwatch = Times(name="stopwatch", start_time = floor(time.time()), running = True, value_at_stop = 0)
         db.session.add(stopwatch)
         db.session.commit()
     elif stopwatch.running == False:
         stopwatch.start_time = time.time()
         stopwatch.running = True
+        stopwatch.value_at_stop = 0
         db.session.add(stopwatch)
         db.session.commit()
-    return jsonify({"stopwatch_start": stopwatch.start_time, "running": stopwatch.running}), 200
+    return jsonify({"stopwatch_start": stopwatch.start_time, "running": stopwatch.running, "value_at_stop": stopwatch.value_at_stop}), 200
 
 @app.route("/stopper/resume", methods=["POST"])
 def resume_stopper():
@@ -154,10 +166,11 @@ def resume_stopper():
 
     if stopwatch != None and stopwatch.running == False:
         stopwatch.running = True
+        stopwatch.start_time = floor(time.time())
         db.session.add(stopwatch)
         db.session.commit()
 
-    return jsonify({"stopwatch_start": stopwatch.start_time, "running": stopwatch.running}), 200
+    return jsonify({"stopwatch_start": stopwatch.start_time, "running": stopwatch.running, "value_at_stop": stopwatch.value_at_stop}), 200
 
 @app.route("/stopper/stop", methods=["POST"])
 def stop_stopper():
@@ -166,10 +179,11 @@ def stop_stopper():
 
     if stopwatch != None and stopwatch.running == True:
         stopwatch.running = False
+        stopwatch.value_at_stop = floor(time.time()) - stopwatch.start_time + stopwatch.value_at_stop
         db.session.add(stopwatch)
         db.session.commit()
 
-    return jsonify({"stopwatch_start": stopwatch.start_time, "running": stopwatch.running}), 200
+    return jsonify({"stopwatch_start": stopwatch.start_time, "running": stopwatch.running, "value_at_stop": stopwatch.value_at_stop}), 200
 
 @app.route("/timer/time", methods=["GET"])
 def get_timer_time():
@@ -247,11 +261,6 @@ def reset_playervotes():
         db.session.commit()
     return jsonify(get_all_players()), 200
 
-    """for i in range(len(players["players"][0])):
-        players["players"][0][str(i)]["votes"] = 0
-    update_players_file()
-    return "Votes cleared", 200"""
-
 @app.route("/player/add", methods=["POST"])
 def add_player():
     data = request.json
@@ -305,7 +314,8 @@ def get_winner_task():
     global winner_task
     return winner_task, 200
 
-#TODO: mängijate hääletus, hääletuse tulemused, stopper faili, hääletuse start
+#TODO: resume korda, 
+#stop - andmebaasi stop time - start time (see on juba käinud aeg), resume alustab uuesti ja liidab selle aja juurde
 
 app.route("/voting/players/addvote/<value>", methods=["POST"])
 def add_player_vote(value):

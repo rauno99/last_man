@@ -58,6 +58,7 @@ export default {
             timer: "",
             stopper: "",
             stopperInterval: null,
+            stopperValueAtStop: null,
             timerInterval: null,
             timePollInterval: null,
             formattedStopper: null,
@@ -87,6 +88,7 @@ export default {
             axios.get(this.protocol + this.ip + "/stopper/time").then((res) => {
                     this.stopper = res.data.stopwatch_start
                     this.stopperAlive = res.data.running
+                    this.stopperValueAtStop = res.data.value_at_stop
                 });
             axios.get(this.protocol + this.ip + "/timer/time").then((res) => {
                 this.timer = res.data.timer_start
@@ -98,7 +100,7 @@ export default {
         formatStopper: function() {
             if (this.stopperAlive) {
                 let currentTime = Math.floor(Date.now() / 1000)
-                let calcStopper = currentTime - this.stopper
+                let calcStopper = currentTime - this.stopper + this.stopperValueAtStop
 
                 let sec = calcStopper
                 let mins = Math.floor(sec / 60)
