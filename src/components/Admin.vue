@@ -110,7 +110,8 @@
                 showResults: true,
             },
                 mostPopularTask: "",
-                loading: true
+                loading: true,
+
             }
         },
         methods: {
@@ -119,6 +120,9 @@
                     this.stopper = res.data.stopwatch_start
                     this.stopperAlive = res.data.running
                     this.stopperValueAtStop = res.data.value_at_stop
+                    if (this.stopperAlive === false && this.loading === true) {
+                        this.formattedStopper = this.formatTimeString(this.stopperValueAtStop)
+                    }
                 });
             axios.get(this.protocol + this.ip + "/timer/time").then((res) => {
                 this.timer = res.data.timer_start
@@ -155,12 +159,7 @@
             });
         },
 
-        formatStopper: function() {
-            if (this.stopperAlive || this.loading) {
-                let currentTime = Math.floor(Date.now() / 1000)
-                let calcStopper = currentTime - this.stopper + this.stopperValueAtStop
-
-                let sec = calcStopper
+        formatTimeString: function(sec) {
                 let mins = Math.floor(sec / 60)
                 sec = sec % 60
                 let hours = Math.floor(mins / 60)
@@ -172,7 +171,18 @@
                     mins = "0" + mins.toString()
                 if (hours < 10)
                     hours = "0" + hours.toString()
-                this.formattedStopper = hours.toString() + ":" + mins.toString() + ":" + sec.toString()
+
+                return hours.toString() + ":" + mins.toString() + ":" + sec.toString()
+
+        },
+
+        formatStopper: function() {
+            this.loading = false
+            if (this.stopperAlive) {
+                let currentTime = Math.floor(Date.now() / 1000)
+                let calcStopper = currentTime - this.stopper + this.stopperValueAtStop
+
+                this.formattedStopper = this.formatTimeString(calcStopper)
             }
         },
 
@@ -180,20 +190,8 @@
             if (this.timerAlive) {
                 let currentTime = Math.floor(Date.now() / 1000)
                 let calcTimer = this.timerDuration - (currentTime - this.timer)
-
-                let sec = calcTimer
-                let mins = Math.floor(sec / 60)
-                sec = sec % 60
-                let hours = Math.floor(mins / 60)
-                mins = mins % 60
-
-                if (sec < 10)
-                    sec = "0" + sec.toString()
-                if (mins < 10)
-                    mins = "0" + mins.toString()
-                if (hours < 10)
-                    hours = "0" + hours.toString()
-                this.formattedTimer = hours.toString() + ":" + mins.toString() + ":" + sec.toString()
+                
+                this.formattedTimer = this.formatTimeString(calcTimer)
             }
         },
         startTimer: function () {
@@ -227,7 +225,7 @@
                 }).then((response) => {
                     this.playerName = ''
                     this.players = response.data
-                    console.log(response)
+                    //console.log(response)
                 });
             }
         },
@@ -276,14 +274,13 @@
 
     mounted() {
         this.getTimes();
-        this.formatStopper();
-        this.loading = false;
         this.stopperInterval = setInterval(() => this.formatStopper(), 1000);
         this.timePollInterval = setInterval(() => this.getTimes(), 5000);
         this.timerInterval = setInterval(() => this.formatTimer(), 1000);
         this.getPlayers();
         this.getTasks();
     },
+
 };
 </script>
 
