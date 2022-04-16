@@ -61,6 +61,7 @@ export default {
             stopperValueAtStop: null,
             timerInterval: null,
             timePollInterval: null,
+            dataInterval: null,
             formattedStopper: null,
             formattedTimer: null,
             stopperAlive: false,
@@ -161,7 +162,13 @@ export default {
             if (this.timerAlive) {
                 let currentTime = Math.floor(Date.now() / 1000)
                 let calcTimer = this.timerDuration - (currentTime - this.timer)
-                this.formattedTimer = this.formatTimeString(calcTimer)
+                if (calcTimer <= 0) {
+                    this.formattedTimer = "00:00:00"
+                    this.stopTimer()
+                }
+                else {
+                    this.formattedTimer = this.formatTimeString(calcTimer)
+                }
             }
         },
 

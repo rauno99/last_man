@@ -102,6 +102,7 @@
                 stopperInterval: null,
                 stopperValueAtStop: null,
                 timerInterval: null,
+                dataInterval: null,
                 formattedStopper: null,
                 formattedTimer: null,
                 timePollInterval: null,
