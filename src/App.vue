@@ -4,7 +4,7 @@
     <b-icon class="h1 mb-1" v-b-toggle.sidebar-backdrop icon="justify" variant="light"></b-icon>
     <b-sidebar
       id="sidebar-backdrop"
-      title="Viimane jöldak püsti"
+      title="Last Man Standing"
       backdrop-variant="dark"
       backdrop
       bg-variant="dark"
