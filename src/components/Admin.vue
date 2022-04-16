@@ -199,6 +199,12 @@
                 });
             },
 
+            getAllData: function() {
+                this.getTasks();
+                this.getPlayers();
+                this.getPlayersforVote();
+            },
+
             ///////////////////STOPPER METHODS//////////////////////
 
             startStopper: function () {
@@ -239,28 +245,41 @@
                     axios.post(this.protocol + this.ip + "/timer/start", {
                         "duration": timerMinutes
                     }).then((res) => {
-                        this.timerUserDuration = ''
+                        this.timerUserDuration = '';
+                        this.timer = res.data.timer_start;
+                        this.timerAlive = res.data.running;
+                        this.timerDuration = res.data.timer_value;
                     });
                 }
             },
 
             resumeTimer: function () {
-                axios.post(this.protocol + this.ip + "/timer/resume");
-            },
-
-            resetTimer: function () {
-                axios.post(this.protocol + this.ip + "/timer/reset");
+                axios.post(this.protocol + this.ip + "/timer/resume").then((res) => {
+                    this.timer = res.data.timer_start
+                    this.timerAlive = res.data.running
+                    this.timerDuration = res.data.timer_value
+                });
             },
 
             stopTimer: function () {
-                axios.post(this.protocol + this.ip + "/timer/stop");
+                axios.post(this.protocol + this.ip + "/timer/stop").then((res) => {
+                    this.timer = res.data.timer_start
+                    this.timerAlive = res.data.running
+                    this.timerDuration = res.data.timer_value
+                });
             },
 
             formatTimer: function() {
                 if (this.timerAlive) {
                     let currentTime = Math.floor(Date.now() / 1000)
                     let calcTimer = this.timerDuration - (currentTime - this.timer)
-                    this.formattedTimer = this.formatTimeString(calcTimer)
+                    if (calcTimer <= 0) {
+                        this.formattedTimer = "00:00:00"
+                        this.stopTimer()
+                    }
+                    else {
+                        this.formattedTimer = this.formatTimeString(calcTimer)
+                    }
                 }
             },
 
@@ -321,8 +340,9 @@
         this.getTasks();
         this.getPlayersforVote()
         this.stopperInterval = setInterval(() => this.formatStopper(), 1000);
-        this.timePollInterval = setInterval(() => this.getTimes(), 5000);
+        this.timePollInterval = setInterval(() => this.getTimes(), 3000);
         this.timerInterval = setInterval(() => this.formatTimer(), 1000);
+        this.dataInterval = setInterval(() => this.getAllData(), 1000)
     },
 
 };

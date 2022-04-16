@@ -140,6 +140,12 @@ export default {
                 this.taskPollOptions.answers = res.data
             });
         },
+
+        getAllData: function() {
+            this.getTasks();
+            this.getPlayers();
+            this.getPlayersforVote();
+        },
         /////////////////////////STOPPER////////////////////////////////////
         formatStopper: function() {
             this.loading = false
@@ -177,9 +183,10 @@ export default {
         this.getPlayers();
         this.getTasks();
         this.getPlayersforVote()
-        this.timePollInterval = setInterval(() => this.getTimes(), 5000);
+        this.timePollInterval = setInterval(() => this.getTimes(), 3000);
         this.stopperInterval = setInterval(() => this.formatStopper(), 1000);
         this.timerInterval = setInterval(() => this.formatTimer(), 1000);
+        this.dataInterval = setInterval(() => this.getAllData(), 1000)
     },
 };
 </script>
