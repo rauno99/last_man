@@ -52,6 +52,7 @@ class Players(db.Model):
     fails = db.Column('fails', db.Integer())
     votes = db.Column('votes', db.Integer())
     include = db.Column('include', db.Boolean())
+    last_winner = db.Column('last_winner', db.Boolean())
 
 ###################################################### FUNCTIONS ######################################################
 
@@ -126,11 +127,47 @@ def reset_tasks_votes():
         db.session.commit()
 
 
-def reset_last_winner():
+def reset_tasks_last_winner():
     tasks = Tasks.query.filter_by(last_winner = True).all()
     for task in tasks:
         task.last_winner = False
         db.session.add(task)
+        db.session.commit()
+
+
+def reset_player_values():
+    players = Players.query.all()
+    for player in players:
+        player.fails = 0
+        player.votes = 0
+        player.include = True
+        player.last_winner = False
+        db.session.add(player)
+        db.session.commit
+
+
+def reset_player_include():
+    players = Players.query.filter_by(include = False).all()
+    for player in players:
+        player.include = True
+        db.session.add(player)
+        db.session.commit
+
+
+#TODO:filter
+def reset_player_votes():
+    players = Players.query.all()
+    for player in players:
+        player.votes = 0
+        db.session.add(player)
+        db.session.commit()
+
+
+def reset_players_last_winner():
+    players = Players.query.filter_by(last_winner = True).all()
+    for player in players:
+        player.last_winner = False
+        db.session.add(player)
         db.session.commit()
 
 
@@ -142,7 +179,22 @@ def get_all_players():
             "value": player.value,
             "text": player.name,
             "votes": player.votes,
-            "fails": player.fails
+            "fails": player.fails,
+            "last_winner": player.last_winner
+
+        } for player in players
+    ]
+    return results
+
+def get_players_for_voting():
+    players = Players.query.filter_by(include = True).order_by(Players.value).all()
+
+    results = [
+        {
+            "value": player.value,
+            "text": player.name,
+            "votes": player.votes,
+            "fails": player.fails,
 
         } for player in players
     ]
@@ -267,7 +319,7 @@ def add_task_vote(value):
 
 @app.route("/voting/tasks/end", methods=["POST"])
 def end_voting():
-    reset_last_winner()
+    reset_tasks_last_winner()
     winner_task = Tasks.query.order_by(Tasks.votes.desc()).first()
     winner_task.include = False
     winner_task.last_winner = True
@@ -278,7 +330,6 @@ def end_voting():
     return jsonify({"winner": winner_task.text, "tasks": get_in_voting_tasks()}), 200
 
 
-#TODO: fix
 @app.route("/voting/winner_task", methods=["GET"])
 def get_winner_task():
     winner_task = Tasks.query.filter_by(last_winner = True).all()
@@ -296,7 +347,7 @@ def get_players():
 @app.route("/player/add", methods=["POST"])
 def add_player():
     data = request.json
-    new_player = Players(name=data["name"], fails=0, votes=0, include=True)
+    new_player = Players(name=data["name"], fails=0, votes=0, include=True, last_winner=False)
     db.session.add(new_player)
     db.session.commit()
     results = get_all_players()
@@ -329,32 +380,53 @@ def remove_fail(value):
     db.session.commit()
     return jsonify(get_all_players()), 200
 
-#TODO: fix
+
 app.route("/voting/players/addvote/<value>", methods=["POST"])
 def add_player_vote(value):
-    players["players"][0][str(value)]["votes"] += 1
-    return jsonify(list(players["players"][0].values())), 200
+    player = Players.query.get(value)
+    player.votes += 1
+    db.session.add(player)
+    db.session.commit()
+
+    return jsonify(get_all_players), 200
+
+
+app.route("/voting/players/get", methods=["GET"])
+def get_for_voting():
+    return jsonify(get_players_for_voting), 200
 
 
 #TODO: fix
 @app.route("/voting/players/end", methods=["POST"])
 def end_playervotes():
-    players = Players.query.all()
-    
-    for player in players:
-        player.votes = 0
-        db.session.add(player)
-        db.session.commit()
-    return jsonify(get_all_players()), 200
+    reset_players_last_winner()
+    reset_player_include()
+    winner_player = Players.query.order_by(Tasks.votes.desc()).first()
+    winner_player.include = False
+    winner_player.last_winner = True
+    db.session.add(winner_player)
+    db.session.commit()
+    reset_player_votes()
+
+    return jsonify({"winner": winner_player.text, "players": get_players_for_voting()}), 200
+
+
+@app.route("/voting/winner_player", methods=["GET"])
+def get_winner_player():
+    winner_player = Players.query.filter_by(last_winner = True).all()
+    if len(winner_player) != 0:
+        winner_player = winner_player[0]
+    return jsonify(winner_player.text), 200
 
 ###################################################### MAIN ######################################################
 
 if __name__ == "__main__":
 
-    #app.run(host="0.0.0.0", port=5000, debug=False)
-    reset_tasks_values()
+    app.run(host="0.0.0.0", port=5000, debug=False)
+    #reset_tasks_values()
+    #reset_players_values()
     #make_tasks()
-    choose_tasks()
+    #choose_tasks()
     #stopwatch()
 
     #TODO: taimer korda, mängijate hääletus, get winner, stopperi nupule reset and start
