@@ -276,7 +276,6 @@
                     let calcTimer = this.timerDuration - (currentTime - this.timer)
                     if (calcTimer <= 0) {
                         this.formattedTimer = "00:00:00"
-                        this.stopTimer()
                     }
                     else {
                         this.formattedTimer = this.formatTimeString(calcTimer)
