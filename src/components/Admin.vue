@@ -178,7 +178,7 @@
 
             getTasks: function() {
                 axios.get(this.protocol + this.ip + "/voting/tasks").then((res) => {
-                    this.pollOptions.answers = res.data
+                    this.taskPollOptions.answers = res.data
                 });
                 axios.get(this.protocol + this.ip + "/voting/winner_task").then((res) => {
                         this.mostPopularTask = res.data
