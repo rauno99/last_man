@@ -66,8 +66,8 @@ def make_tasks(input="Sõlme tegemine väikse krutskiga, peast arvutamine, ühel
 
 def choose_tasks():
     reset_in_voting_tasks()
-    tasks = Tasks.query.filter_by(include = True).all()     
-    choice = random.choices(tasks, k=4)
+    tasks = Tasks.query.filter_by(include = True).all() 
+    choice = random.sample(tasks, k=4)
 
     results = []
 
@@ -106,6 +106,16 @@ def reset_in_voting_tasks():
         db.session.add(task)
         db.session.commit()    
 
+
+def reset_tasks_values():
+    tasks = Tasks.query.all()
+    for task in tasks:
+        task.votes = 0
+        task.in_voting = False
+        task.include = True
+        task.last_winner = False
+        db.session.add(task)
+        db.session.commit()
 
 #TODO:filter
 def reset_tasks_votes():
@@ -271,11 +281,10 @@ def end_voting():
 #TODO: fix
 @app.route("/voting/winner_task", methods=["GET"])
 def get_winner_task():
-    winner_task = Tasks.query.filter_by(last_winner = True).all()[0]
-
-    print(winner_task)
-    
-    return jsonify({"winner_task": winner_task.text}), 200
+    winner_task = Tasks.query.filter_by(last_winner = True).all()
+    if len(winner_task) != 0:
+        winner_task = winner_task[0]
+    return jsonify(winner_task.text), 200
 
 ###################################################### Players ######################################################
 
@@ -342,9 +351,10 @@ def end_playervotes():
 
 if __name__ == "__main__":
 
-    app.run(host="0.0.0.0", port=5000, debug=False)
+    #app.run(host="0.0.0.0", port=5000, debug=False)
+    reset_tasks_values()
     #make_tasks()
-    #choose_tasks()
+    choose_tasks()
     #stopwatch()
 
     #TODO: taimer korda, mängijate hääletus, get winner, stopperi nupule reset and start
