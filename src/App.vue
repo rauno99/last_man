@@ -28,7 +28,7 @@
     </b-sidebar>
     <b-row class="text-center">
       <b-col>
-        <img src="@/assets/TTP_logo_kuupäevadeta_must.png" width="300" height="300"/>
+        <img src="@/assets/TTP_logo_kuupäevadeta_oranz.png" width="300" height="300"/>
       </b-col>
     </b-row>
     <router-view/>
