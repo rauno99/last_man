@@ -12,14 +12,14 @@
         </b-row>
         <b-row class=text-center>
             <b-col>
-                <b-button class="m-1" @click="startStopper">Start</b-button>
+                <b-button class="m-1" @click="startStopper">Start/Nulli</b-button>
                 <b-button class="m-1" @click="resumeStopper">Resume</b-button>
                 <b-button class="m-1" @click="stopStopper">Stop</b-button>
             </b-col>
             <b-col>
                 <input v-model="timerUserDuration" placeholder="Minutid">
                 <b-button class="m-1" @click="startTimer">Start</b-button>
-                <b-button class="m-1" @click="resumeTimer">Resume</b-button>
+                <!--<b-button class="m-1" @click="resumeTimer">Resume</b-button>-->
                 <b-button class="m-1" @click="stopTimer">Stop</b-button>
             </b-col>
         </b-row>
@@ -67,6 +67,12 @@
                 <b-button @click="endTasksPoll">Lõpeta hääletus</b-button>
             </b-col>
         </b-row>
+        <hr>
+        <b-row>
+            <b-col>
+                <h1 class="timeTitle">Eelmise mängija hääletuse võitja: {{mostPopularPlayer}}</h1>
+            </b-col>
+        </b-row>
         <b-row>
             <b-col>
                 <vue-poll v-bind="playerPollOptions" />
@@ -103,8 +109,8 @@
                 playerName: '',
                 timerDuration: '',
                 stopperDuration: '',
-                ip: window.location.hostname + ":5000",
-                protocol: "http://",
+                ip: window.location.hostname,
+                protocol: "https://",
                 players: {},
                 stopperAlive: false,
                 timerAlive: false,
@@ -172,8 +178,16 @@
             getPlayers: function() {
                 axios.get(this.protocol + this.ip + "/player/get").then((res) => {
                     this.players = res.data
-                    this.playerPollOptions.answers = res.data
                 });     
+                axios.get(this.protocol + this.ip + "/voting/winner_player").then((res) => {
+                        this.mostPopularPlayer = res.data
+                });
+            },
+
+            getPlayersforVote: function() {
+                axios.get(this.protocol + this.ip + "/voting/players/get").then((res) => {
+                    this.playerPollOptions.answers = res.data
+                }); 
             },
 
             getTasks: function() {
@@ -252,8 +266,7 @@
 
             //////////////////////////PLAYER//////////////////////////////
 
-            addPlayer: function() {this.getPlayers();
-        this.getTasks();
+            addPlayer: function() {
                 if (this.playerName != '') {
                     axios.post(this.protocol + this.ip + "/player/add", {
                         "name": this.playerName
@@ -287,7 +300,7 @@
             endPlayerPoll: function() {
                 axios.post(this.protocol + this.ip + "/voting/players/end").then((res) => {
                     this.mostPopularPlayer = res.data.winner
-                    this.playerPollOptions.answers = res.data.tasks
+                    this.playerPollOptions.answers = res.data.players
                 });
             },
 
@@ -306,6 +319,7 @@
         this.getTimes();
         this.getPlayers();
         this.getTasks();
+        this.getPlayersforVote()
         this.stopperInterval = setInterval(() => this.formatStopper(), 1000);
         this.timePollInterval = setInterval(() => this.getTimes(), 5000);
         this.timerInterval = setInterval(() => this.formatTimer(), 1000);

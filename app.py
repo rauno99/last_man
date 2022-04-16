@@ -15,10 +15,10 @@ app = Flask(__name__, static_folder="dist/", static_url_path="/")
 CORS(app)
 
 #Local development URL
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:1234@localhost:5432/last_man_db'
+#app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:1234@localhost:5432/last_man_db'
 
 # Heroku database URL
-#app.config['SQLALCHEMY_DATABASE_URI'] = 'postgres://eupjeijraobnwo:19ee1d4919796a724bd693ee2803d20edbbf02dca5abe14fb27402b0949362ad@ec2-52-212-228-71.eu-west-1.compute.amazonaws.com:5432/dbpsjih91uudnl'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgres://eupjeijraobnwo:19ee1d4919796a724bd693ee2803d20edbbf02dca5abe14fb27402b0949362ad@ec2-52-212-228-71.eu-west-1.compute.amazonaws.com:5432/dbpsjih91uudnl'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
@@ -335,7 +335,8 @@ def get_winner_task():
     winner_task = Tasks.query.filter_by(last_winner = True).all()
     if len(winner_task) != 0:
         winner_task = winner_task[0]
-    return jsonify(winner_task.text), 200
+        return jsonify(winner_task.text), 200
+    return "", 200
 
 ###################################################### Players ######################################################
 
@@ -381,19 +382,19 @@ def remove_fail(value):
     return jsonify(get_all_players()), 200
 
 
-app.route("/voting/players/addvote/<value>", methods=["POST"])
+@app.route("/voting/players/addvote/<value>", methods=["POST"])
 def add_player_vote(value):
     player = Players.query.get(value)
     player.votes += 1
     db.session.add(player)
     db.session.commit()
 
-    return jsonify(get_all_players), 200
+    return jsonify(get_players_for_voting()), 200
 
 
-app.route("/voting/players/get", methods=["GET"])
+@app.route("/voting/players/get", methods=["GET"])
 def get_for_voting():
-    return jsonify(get_players_for_voting), 200
+    return jsonify(get_players_for_voting()), 200
 
 
 #TODO: fix
@@ -401,14 +402,14 @@ def get_for_voting():
 def end_playervotes():
     reset_players_last_winner()
     reset_player_include()
-    winner_player = Players.query.order_by(Tasks.votes.desc()).first()
+    winner_player = Players.query.order_by(Players.votes.desc()).first()
     winner_player.include = False
     winner_player.last_winner = True
     db.session.add(winner_player)
     db.session.commit()
     reset_player_votes()
 
-    return jsonify({"winner": winner_player.text, "players": get_players_for_voting()}), 200
+    return jsonify({"winner": winner_player.name, "players": get_players_for_voting()}), 200
 
 
 @app.route("/voting/winner_player", methods=["GET"])
@@ -416,7 +417,8 @@ def get_winner_player():
     winner_player = Players.query.filter_by(last_winner = True).all()
     if len(winner_player) != 0:
         winner_player = winner_player[0]
-    return jsonify(winner_player.text), 200
+        return jsonify(winner_player.name), 200
+    return "", 200
 
 ###################################################### MAIN ######################################################
 
@@ -424,9 +426,6 @@ if __name__ == "__main__":
 
     app.run(host="0.0.0.0", port=5000, debug=False)
     #reset_tasks_values()
-    #reset_players_values()
+    #reset_player_values()
     #make_tasks()
     #choose_tasks()
-    #stopwatch()
-
-    #TODO: taimer korda, mängijate hääletus, get winner, stopperi nupule reset and start

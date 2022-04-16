@@ -32,13 +32,13 @@
         <b-row>
             <b-col>
                 <vue-poll v-if="showTaskPoll" v-bind="taskPollOptions" @addvote="addTaskVote" />
-                <h1 class="timeTitle" v-else>"Hääletatud!"</h1>
+                <h1 class="timeTitle" v-else>Hääletatud!</h1>
             </b-col>
         </b-row>
         <b-row>
             <b-col>
                 <vue-poll v-if="showPlayerPoll" v-bind="playerPollOptions" @addvote="addPlayerVote" />
-                <h1 class="timeTitle" v-else>"Hääletatud!"</h1>
+                <h1 class="timeTitle" v-else>Hääletatud!</h1>
             </b-col>
         </b-row>
     </div>
@@ -66,8 +66,8 @@ export default {
             stopperAlive: false,
             timerAlive: false,
             timerDuration: null,
-            ip: window.location.hostname + ":5000",
-            protocol: "http://",
+            ip: window.location.hostname,
+            protocol: "https://",
             players: {},
 
             taskPollOptions: {
@@ -126,8 +126,13 @@ export default {
         getPlayers: function() {
             axios.get(this.protocol + this.ip + "/player/get").then((res) => {
                 this.players = res.data
-                this.playerPollOptions.answers = res.data
             });     
+        },
+
+        getPlayersforVote: function() {
+            axios.get(this.protocol + this.ip + "/voting/players/get").then((res) => {
+                this.playerPollOptions.answers = res.data
+            }); 
         },
 
         getTasks: function() {
@@ -157,7 +162,7 @@ export default {
         ///////////////////////////PLAYERS//////////////////////////////7
         addPlayerVote: function(obj) {
             this.showPlayerPoll = false
-            //axios.post(this.protocol + this.ip + "/voting/tasks/addvote/" + obj.value.toString())
+            axios.post(this.protocol + this.ip + "/voting/players/addvote/" + obj.value.toString())
         },
 
         ////////////////////////////TASKS////////////////////////////////
@@ -171,6 +176,7 @@ export default {
         this.getTimes()
         this.getPlayers();
         this.getTasks();
+        this.getPlayersforVote()
         this.timePollInterval = setInterval(() => this.getTimes(), 5000);
         this.stopperInterval = setInterval(() => this.formatStopper(), 1000);
         this.timerInterval = setInterval(() => this.formatTimer(), 1000);
