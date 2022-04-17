@@ -83,7 +83,9 @@ export default {
 
             showPlayerPoll: true,
             showTaskPoll: true,
-            loading: true
+            loading: true,
+            showTaskVoteInterval: null,
+            showPlayerVoteInterval: null
         };
     },
     methods: {
@@ -110,13 +112,13 @@ export default {
         ////////////////////////POLL FROM SERVER////////////////////////////////
         getTimes: function () {
             axios.get(this.protocol + this.ip + "/stopper/time").then((res) => {
-                    this.stopper = res.data.stopwatch_start
-                    this.stopperAlive = res.data.running
-                    this.stopperValueAtStop = res.data.value_at_stop
-                    if (this.stopperAlive === false && this.loading === true) {
-                        this.formattedStopper = this.formatTimeString(this.stopperValueAtStop)
-                    }
-                });
+                this.stopper = res.data.stopwatch_start
+                this.stopperAlive = res.data.running
+                this.stopperValueAtStop = res.data.value_at_stop
+                if (this.stopperAlive === false && this.loading === true) {
+                    this.formattedStopper = this.formatTimeString(this.stopperValueAtStop)
+                }
+            });
             axios.get(this.protocol + this.ip + "/timer/time").then((res) => {
                 this.timer = res.data.timer_start
                 this.timerAlive = res.data.running
@@ -175,12 +177,15 @@ export default {
         addPlayerVote: function(obj) {
             this.showPlayerPoll = false
             axios.post(this.protocol + this.ip + "/voting/players/addvote/" + obj.value.toString())
+            this.showPlayerVoteInterval = setInterval(() => this.showPlayerPoll = true, 10000);
         },
 
         ////////////////////////////TASKS////////////////////////////////
         addTaskVote: function(obj) {
             this.showTaskPoll = false
             axios.post(this.protocol + this.ip + "/voting/tasks/addvote/" + obj.value.toString())
+            this.showTaskVoteInterval = setInterval(() => this.showTaskPoll = true, 10000)
+            
         },
     },
 
@@ -192,7 +197,7 @@ export default {
         this.timePollInterval = setInterval(() => this.getTimes(), 3000);
         this.stopperInterval = setInterval(() => this.formatStopper(), 1000);
         this.timerInterval = setInterval(() => this.formatTimer(), 1000);
-        this.dataInterval = setInterval(() => this.getAllData(), 1000)
+        this.dataInterval = setInterval(() => this.getAllData(), 1000);
     },
 };
 </script>
@@ -217,7 +222,7 @@ export default {
     font-family: "Roboto", sans-serif;
     color: gray;
     font-weight: 300;
-    font-size: 200%;
+    font-size: 100%;
 }
 
 .playerX {

@@ -27,6 +27,9 @@
       </div>
     </b-sidebar>
     <b-row class="text-center">
+        <h1 class="bigTitle">Last Man Standing</h1>
+    </b-row>
+    <b-row class="text-center">
       <b-col>
         <img src="@/assets/TTP_logo_kuupäevadeta_oranz.png" width="300" height="300"/>
       </b-col>
@@ -50,6 +53,13 @@
 
   #app {
     background-color: black;
+  }
+
+  .bigTitle {
+    font-family: 'Roboto', sans-serif;
+    color: gray;
+    font-weight: bold;
+    font-size: 5vh;
   }
 
 </style>
