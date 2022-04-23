@@ -58,6 +58,7 @@ class Players(db.Model):
 
 def make_tasks(input="Sõlme tegemine, Rippumine, Peast arvutamine, Ühel jalal seismine, Teksti dešifreerimine, Kavalalt räpane nali, Märki viskamine, Silmad kinni seismine, Raskuse käes hoidmine, Palli hoidmine, Arvude loendamine, Tagurpidi tähestiku lugemine, Pii lugemine, Nööriga pastakas pudelisse, Koostöö ülesanne, Piltmõistatus, Kükitamine, Käed selja taga, Arvamismäng, Ämbri viskamine, Jooksuvõistlus"):
     names = input.split(", ")
+    
  
     for i in range(len(names)):
         new_task = Tasks(text=names[i], votes=0, include=True, in_voting=False, last_winner=False)
