@@ -12,7 +12,7 @@ const routes = [
   },
 
   {
-    path: '/admin',
+    path: '/maeiteamissiiapannagjhlwsiiw285ks5594dks4993k',
     name: 'Admin',
     component: Admin
   },
