@@ -21,7 +21,7 @@ CORS(app)
 SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL")
 if SQLALCHEMY_DATABASE_URI.startswith("postgres://"):
     SQLALCHEMY_DATABASE_URI = SQLALCHEMY_DATABASE_URI.replace("postgres://", "postgresql://", 1)
-#app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://eupjeijraobnwo:19ee1d4919796a724bd693ee2803d20edbbf02dca5abe14fb27402b0949362ad@ec2-52-212-228-71.eu-west-1.compute.amazonaws.com:5432/dbpsjih91uudnl'
+app.config['SQLALCHEMY_DATABASE_URI'] = SQLALCHEMY_DATABASE_URI
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
