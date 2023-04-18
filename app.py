@@ -4,7 +4,7 @@
 
 #MVP-d: Markus, Markus, Samsungi monitor, huge ass chonky Samsungi monitor, Robert
 
-import time, json, random, os
+import time, random
 from math import floor
 from flask import Flask, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
@@ -15,13 +15,13 @@ app = Flask(__name__, static_folder="dist/", static_url_path="/")
 CORS(app)
 
 #Local development URL
-#app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:1234@localhost:5432/last_man_db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:1234@localhost:5432/last_man_db'
 
-# Heroku database URL
-SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL")
-if SQLALCHEMY_DATABASE_URI.startswith("postgres://"):
-    SQLALCHEMY_DATABASE_URI = SQLALCHEMY_DATABASE_URI.replace("postgres://", "postgresql://", 1)
-app.config['SQLALCHEMY_DATABASE_URI'] = SQLALCHEMY_DATABASE_URI
+# # Heroku database URL
+# SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL")
+# if SQLALCHEMY_DATABASE_URI.startswith("postgres://"):
+#     SQLALCHEMY_DATABASE_URI = SQLALCHEMY_DATABASE_URI.replace("postgres://", "postgresql://", 1)
+# app.config['SQLALCHEMY_DATABASE_URI'] = SQLALCHEMY_DATABASE_URI
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
@@ -428,7 +428,7 @@ def get_winner_player():
 
 if __name__ == "__main__":
 
-    app.run(host="0.0.0.0", port=5000, debug=False)
+    app.run(host="127.0.0.1", port=5000, debug=False)
     #reset_tasks_values()
     #reset_player_values()
     #make_tasks()

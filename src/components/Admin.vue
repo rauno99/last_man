@@ -68,7 +68,7 @@
             </b-col>
         </b-row>
         <hr>
-        <b-row>
+        <!-- <b-row>
             <b-col>
                 <h1 class="timeTitle">Eelmise mängija hääletuse võitja: {{mostPopularPlayer}}</h1>
             </b-col>
@@ -82,7 +82,7 @@
             <b-col>
                 <b-button @click="endPlayerPoll">Lõpeta hääletus</b-button>
             </b-col>
-        </b-row>
+        </b-row> -->
     </div>
 </template>
 

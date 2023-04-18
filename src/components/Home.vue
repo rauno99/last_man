@@ -35,12 +35,12 @@
                 <h1 class="timeTitle" v-else>Hääletatud!</h1>
             </b-col>
         </b-row>
-        <b-row>
+        <!-- <b-row>
             <b-col>
                 <vue-poll v-if="showPlayerPoll" v-bind="playerPollOptions" @addvote="addPlayerVote" />
                 <h1 class="timeTitle" v-else>Hääletatud!</h1>
             </b-col>
-        </b-row>
+        </b-row> -->
     </div>
 </template>
 
