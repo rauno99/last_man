@@ -4,7 +4,7 @@
 
 #MVP-d: Markus, Markus, Samsungi monitor, huge ass chonky Samsungi monitor, Robert
 
-import time, random
+import time, random, os
 from math import floor
 from flask import Flask, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
@@ -15,13 +15,13 @@ app = Flask(__name__, static_folder="dist/", static_url_path="/")
 CORS(app)
 
 #Local development URL
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:1234@localhost:5432/last_man_db'
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:1234@localhost:5432/last_man_db'
 
 # # Heroku database URL
-# SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL")
-# if SQLALCHEMY_DATABASE_URI.startswith("postgres://"):
-#     SQLALCHEMY_DATABASE_URI = SQLALCHEMY_DATABASE_URI.replace("postgres://", "postgresql://", 1)
-# app.config['SQLALCHEMY_DATABASE_URI'] = SQLALCHEMY_DATABASE_URI
+SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL")
+if SQLALCHEMY_DATABASE_URI.startswith("postgres://"):
+    SQLALCHEMY_DATABASE_URI = SQLALCHEMY_DATABASE_URI.replace("postgres://", "postgresql://", 1)
+app.config['SQLALCHEMY_DATABASE_URI'] = SQLALCHEMY_DATABASE_URI
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
