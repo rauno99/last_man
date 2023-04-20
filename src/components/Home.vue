@@ -5,10 +5,10 @@
                 <h2 class="timeTitle">Seistud aeg</h2>
                 <h1 class="time">{{ formattedStopper }}</h1>
             </b-col>
-            <b-col>
+            <!-- <b-col>
                 <h2 class="timeTitle">Järgmise ülesandeni</h2>
                 <h1 class="time">{{ formattedTimer }}</h1>
-            </b-col>
+            </b-col> -->
         </b-row>
         <hr>
         <b-row class="text-center">
@@ -17,13 +17,13 @@
                 <thead>
                     <tr>
                         <th class="playerNames">Mängija nimi</th>
-                        <th class="playerNames">Kaotused</th> 
+                        <!-- <th class="playerNames">Kaotused</th>  -->
                     </tr>
                 </thead>
                 <tbody>
                     <tr v-for="(value, key) in players" :key="key">
                         <td class="playerNames">{{value.text}}</td>
-                        <td class="playerX">{{calcX(value.fails)}}</td>
+                        <!-- <td class="playerX">{{calcX(value.fails)}}</td> -->
                     </tr>
                 </tbody>
             </table>

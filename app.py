@@ -59,8 +59,8 @@ class Players(db.Model):
 
 ###################################################### FUNCTIONS ######################################################
 
-def make_tasks(input="Sõlme tegemine, Rippumine, Peast arvutamine, Ühel jalal seismine, Teksti dešifreerimine, Kavalalt räpane nali, Märki viskamine, Silmad kinni seismine, Raskuse käes hoidmine, Palli hoidmine, Arvude loendamine, Tagurpidi tähestiku lugemine, Pii lugemine, Nööriga pastakas pudelisse, Koostöö ülesanne, Piltmõistatus, Kükitamine, Käed selja taga, Arvamismäng, Ämbri viskamine, Jooksuvõistlus"):
-    names = input.split(", ")
+def make_tasks(input="pikim sõna,kategooriate tundmine,pääsukese poos,raskuse hoidmine,arvude loetlemine,räpane nali,käed selja taga seismine,pallivise,peast arvutamine,pii lugemine,tagurpidi tähestik,ühel jalal seismine,sõlme sidumine,kükitamine,kükkide tegemine,kuum kartul,tasakaalu hoidmine,käteaasast läbi astumine"):
+    names = input.split(",")
     
  
     for i in range(len(names)):
